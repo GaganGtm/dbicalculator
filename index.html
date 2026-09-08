@@ -24,9 +24,9 @@
         /* Scrollable Data Area */
         .table-scroll-container { max-height: 65vh; overflow-y: auto; border: 1px solid #ccc; background: white; }
 
-        /* Compact & Alternating Table Design */
-        table { border-collapse: collapse; width: 100%; table-layout: auto; background: white;}
-        th, td { border: 1px solid #ccc; padding: 5px; text-align: center; font-size: 11px; }
+        /* FAST Table Design - Fixed layout prevents browser lag on 10k rows */
+        table { border-collapse: collapse; width: 100%; table-layout: fixed; background: white;}
+        th, td { border: 1px solid #ccc; padding: 5px; text-align: center; font-size: 11px; word-wrap: break-word; overflow: hidden; }
         
         /* Sticky Table Headers */
         #spreadsheet thead tr th { position: sticky; top: 0; z-index: 10; background-color: #1976d2; color: white; }
@@ -38,8 +38,8 @@
         
         input, select { width: 95%; box-sizing: border-box; padding: 4px; border: 1px solid #bbb; font-size: 11px; background-color: rgba(255,255,255,0.8); border-radius: 3px;}
         
-        /* Column Widths */
-        .col-sn { width: 2%; } .col-fac { width: 9%; } .col-child { width: 9%; } .col-date { width: 8.5%; } .col-age { width: 4%; } .col-gen { width: 4%; } .col-wt { width: 5.5%; } .col-ht { width: 5.5%; } .col-z { width: 3.5%; }  .col-stat { width: 6.5%; } .col-dbi { width: 8%; }
+        /* Column Widths strictly enforced for Performance */
+        .col-sn { width: 3%; } .col-fac { width: 10%; } .col-child { width: 10%; } .col-date { width: 7.5%; } .col-age { width: 4.5%; } .col-gen { width: 4.5%; } .col-wt { width: 5%; } .col-ht { width: 5%; } .col-z { width: 4%; }  .col-stat { width: 7%; } .col-dbi { width: 9%; }
 
         .dbi-cat { font-weight: normal !important; } .status-cell { font-weight: bold; }
 
@@ -122,7 +122,7 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <!-- Rows injected via JS Engine -->
+                    <!-- Rows injected via Fast JS Engine -->
                 </tbody>
             </table>
         </div>
@@ -222,7 +222,7 @@
             <div class="guide-box">
                 <h3>Summary Dashboard</h3>
                 <p>The second tab named <strong>Double Burden Index Summary</strong> has a table, pie-chart and Cohort's number.</p>
-                <p>This automatically aggregates and shows the total number of children sorted from A to I categories for rapid reporting.</p>
+                <p>This automatically aggregates and shows the total number of children sorted from A to J categories for rapid reporting.</p>
             </div>
             
             <div class="guide-box">
@@ -239,7 +239,7 @@
             <h3>Technical Note: Calculation Assumptions</h3>
             <p><strong>DBI Classification Limits:</strong> DBI classification uses a Z‑score less than −2 to classify low weight-for-age as “underweight”, low length/height-for-age as “stunted”, and low weight-for-length as “wasted”. Similarly a Z‑score above +2 is used to classify weight-for-height as “Overweight/Obesity”.</p>
             <p><strong>LMS Method:</strong> The computation of percentiles and z-scores for all three indicators uses formulae based on the LMS method given by Cole and Green in 1992, matching WHO Anthro software.</p>
-            <p><strong>Underweight-Obesity Anomaly:</strong> Mathematically impossible. Represents a theoretical reality only in rare Severe IUGR cases with profoundly compromised length. If flagged, data requires re-verification.</p>
+            <p><strong>Underweight-Obesity Anomaly:</strong> Rarely observed clinically, but formally classified within this tool as Category J (Underweight + Stunting + Obese). If flagged, data requires careful re-verification.</p>
             <p><strong>Age Limit:</strong> Tool will not function for children > 5 years (60 months) per WHO 2006 standards.</p>
             <p><strong>Minimum Length:</strong> No classification for length < 45 cm per WHO standards.</p>
         </div>
@@ -147845,6 +147845,8 @@
         if (!wfaData || !hfaData || !whzData) { out.dbi = "Missing Data"; return out; }
 
         let dbi = "Implausible data";
+        
+        // Category J Added
         if (wazStat === "Normal" && hazStat === "Normal" && whzStat === "Normal") dbi = "A (Normal)";
         else if (wazStat === "Normal" && hazStat === "Normal" && (whzStat === "MAM" || whzStat === "SAM")) dbi = "B (Only Wasting)";
         else if (wazStat === "Normal" && hazStat === "Normal" && whzStat === "Obese") dbi = "I (Only Obese)";
@@ -147854,10 +147856,12 @@
         else if (wazStat.includes("Underweight") && hazStat === "Normal" && (whzStat === "MAM" || whzStat === "SAM")) dbi = "C (Underweight + Wasting)";
         else if (wazStat.includes("Underweight") && hazStat.includes("Stunted") && whzStat === "Normal") dbi = "E (Underweight + Stunting)";
         else if (wazStat.includes("Underweight") && hazStat.includes("Stunted") && (whzStat === "MAM" || whzStat === "SAM")) dbi = "D (Underweight + Stunting + Wasting)";
+        else if (wazStat.includes("Underweight") && hazStat.includes("Stunted") && whzStat === "Obese") dbi = "J (Underweight + Stunting + Obese)";
 
         out.dbi = dbi;
         if (dbi.startsWith("A (")) { out.dbiBg = "#4caf50"; out.dbiColor = "white"; } 
         else if (dbi.startsWith("D (")) { out.dbiBg = "#f44336"; out.dbiColor = "white"; }
+        else if (dbi.startsWith("J (")) { out.dbiBg = "#795548"; out.dbiColor = "white"; }
         
         return out;
     }
@@ -147931,7 +147935,7 @@
         alert(`Successfully imported ${addedCount} rows.`);
     }
 
-    // Handled typed changes for individual active rows
+    // Handled typed changes using ultra-fast textContent 
     function calcRow(id) {
         const row = document.getElementById(`row-${id}`);
         const sDate = row.querySelector('.surveyDate').value, bDate = row.querySelector('.dob').value, gender = row.querySelector('.gender').value;
@@ -147940,47 +147944,91 @@
         let calc = calculateLogic(sDate, bDate, gender, w, h);
         
         row.dataset.ageDays = calc.ageDays;
-        row.querySelector('.age-months').innerText = calc.ageM;
-        row.querySelector('.waz-z').innerText = calc.wazZ; row.querySelector('.waz-stat').innerText = calc.wazS;
-        row.querySelector('.haz-z').innerText = calc.hazZ; row.querySelector('.haz-stat').innerText = calc.hazS;
-        row.querySelector('.whz-z').innerText = calc.whzZ; row.querySelector('.whz-stat').innerText = calc.whzS;
+        row.querySelector('.age-months').textContent = calc.ageM;
+        row.querySelector('.waz-z').textContent = calc.wazZ; row.querySelector('.waz-stat').textContent = calc.wazS;
+        row.querySelector('.haz-z').textContent = calc.hazZ; row.querySelector('.haz-stat').textContent = calc.hazS;
+        row.querySelector('.whz-z').textContent = calc.whzZ; row.querySelector('.whz-stat').textContent = calc.whzS;
         
         const outDbi = row.querySelector('.dbi-cat');
-        outDbi.innerText = calc.dbi;
+        outDbi.textContent = calc.dbi;
         outDbi.style.backgroundColor = calc.dbiBg;
         outDbi.style.color = calc.dbiColor;
     }
 
-    /* Summary Dashboard Logic */
+    /* Fast Summary Dashboard Logic */
     function generateSummary() {
-        const rows = document.querySelectorAll('.dbi-cat'); let counts = { A:0, B:0, C:0, D:0, E:0, F:0, G:0, H:0, I:0, Over5:0, Implausible:0, Error:0 }; let validTotal = 0; let grandTotal = 0;
-        rows.forEach(r => {
-            let val = r.innerText.trim(); if (!val) return; 
-            if(val.startsWith("A (")) { counts.A++; validTotal++; grandTotal++; } else if(val.startsWith("B (")) { counts.B++; validTotal++; grandTotal++; } else if(val.startsWith("C (")) { counts.C++; validTotal++; grandTotal++; } else if(val.startsWith("D (")) { counts.D++; validTotal++; grandTotal++; } else if(val.startsWith("E (")) { counts.E++; validTotal++; grandTotal++; } else if(val.startsWith("F (")) { counts.F++; validTotal++; grandTotal++; } else if(val.startsWith("G (")) { counts.G++; validTotal++; grandTotal++; } else if(val.startsWith("H (")) { counts.H++; validTotal++; grandTotal++; } else if(val.startsWith("I (")) { counts.I++; validTotal++; grandTotal++; } else if(val.includes("> 5 years")) { counts.Over5++; grandTotal++; } else if(val.includes("Implausible")) { counts.Implausible++; grandTotal++; } else { counts.Error++; grandTotal++; } 
+        let counts = { A:0, B:0, C:0, D:0, E:0, F:0, G:0, H:0, I:0, J:0, Over5:0, Implausible:0, Error:0 }; 
+        let validTotal = 0; let grandTotal = 0;
+        
+        const rows = document.getElementById('tableBody').children;
+        for(let i=0; i<rows.length; i++) {
+            let r = rows[i];
+            let val = r.lastElementChild.textContent.trim(); 
+            if (!val) continue; 
+            
+            let firstChar = val.charAt(0);
+            if(firstChar === 'A') { counts.A++; validTotal++; grandTotal++; } 
+            else if(firstChar === 'B') { counts.B++; validTotal++; grandTotal++; } 
+            else if(firstChar === 'C') { counts.C++; validTotal++; grandTotal++; } 
+            else if(firstChar === 'D') { counts.D++; validTotal++; grandTotal++; } 
+            else if(firstChar === 'E') { counts.E++; validTotal++; grandTotal++; } 
+            else if(firstChar === 'F') { counts.F++; validTotal++; grandTotal++; } 
+            else if(firstChar === 'G') { counts.G++; validTotal++; grandTotal++; } 
+            else if(firstChar === 'H') { counts.H++; validTotal++; grandTotal++; } 
+            else if(firstChar === 'I') { counts.I++; validTotal++; grandTotal++; } 
+            else if(firstChar === 'J') { counts.J++; validTotal++; grandTotal++; } 
+            else if(val.includes("> 5 years")) { counts.Over5++; grandTotal++; } 
+            else if(val.includes("Implausible")) { counts.Implausible++; grandTotal++; } 
+            else { counts.Error++; grandTotal++; } 
+        }
+
+        const categories = [
+            { id: "A", name: "Normal", bg: "#4caf50" }, 
+            { id: "B", name: "Only Wasting", bg: "#8bc34a" }, 
+            { id: "C", name: "Underweight + Wasting", bg: "#ff9800" }, 
+            { id: "D", name: "Underweight + Stunting + Wasting", bg: "#f44336" }, 
+            { id: "E", name: "Underweight + Stunting", bg: "#ffeb3b" }, 
+            { id: "F", name: "Only Stunting", bg: "#00bcd4" }, 
+            { id: "G", name: "Only Underweight", bg: "#03a9f4" }, 
+            { id: "H", name: "Stunting + Obesity", bg: "#9c27b0" }, 
+            { id: "I", name: "Only Obesity", bg: "#e91e63" },
+            { id: "J", name: "Underweight + Stunting + Obese", bg: "#795548" }
+        ];
+
+        let html = ''; let chartData = []; let chartColors = []; let chartLabels = []; let totalAtoJ = 0;
+        categories.forEach(cat => { 
+            let count = counts[cat.id]; 
+            totalAtoJ += count; 
+            let perc = validTotal > 0 ? ((count / validTotal) * 100).toFixed(1) : "0.0"; 
+            html += `<tr><td style="text-align:center; font-weight:bold;">${cat.id}</td><td style="text-align:left;">${cat.name}</td><td style="text-align:center;">${count}</td><td style="text-align:center;">${perc}%</td></tr>`; 
+            if (count > 0) { chartData.push(count); chartColors.push(cat.bg); chartLabels.push(`${cat.name} (${perc}%)`); } 
         });
-        const categories = [{ id: "A", name: "Normal", bg: "#4caf50" }, { id: "B", name: "Only Wasting", bg: "#8bc34a" }, { id: "C", name: "Underweight + Wasting", bg: "#ff9800" }, { id: "D", name: "Underweight + Stunting + Wasting", bg: "#f44336" }, { id: "E", name: "Underweight + Stunting", bg: "#ffeb3b" }, { id: "F", name: "Only Stunting", bg: "#00bcd4" }, { id: "G", name: "Only Underweight", bg: "#03a9f4" }, { id: "H", name: "Stunting + Obesity", bg: "#9c27b0" }, { id: "I", name: "Only Obesity", bg: "#e91e63" }];
-        let html = ''; let chartData = []; let chartColors = []; let chartLabels = []; let totalAtoI = 0;
-        categories.forEach(cat => { let count = counts[cat.id]; totalAtoI += count; let perc = validTotal > 0 ? ((count / validTotal) * 100).toFixed(1) : "0.0"; html += `<tr><td style="text-align:center; font-weight:bold;">${cat.id}</td><td style="text-align:left;">${cat.name}</td><td style="text-align:center;">${count}</td><td style="text-align:center;">${perc}%</td></tr>`; if (count > 0) { chartData.push(count); chartColors.push(cat.bg); chartLabels.push(`${cat.name} (${perc}%)`); } });
-        document.getElementById('summaryBody').innerHTML = html + `<tr style="background:#e8f5e9; color:black; font-weight:bold"><td colspan="2" style="text-align:right;">Total (A to I)</td><td style="text-align:center;">${totalAtoI}</td><td style="text-align:center;">${validTotal>0?((totalAtoI/validTotal)*100).toFixed(1):"0.0"}%</td></tr>`;
+
+        document.getElementById('summaryBody').innerHTML = html + `<tr style="background:#e8f5e9; color:black; font-weight:bold"><td colspan="2" style="text-align:right;">Total (A to J)</td><td style="text-align:center;">${totalAtoJ}</td><td style="text-align:center;">${validTotal>0?((totalAtoJ/validTotal)*100).toFixed(1):"0.0"}%</td></tr>`;
         document.getElementById('secondarySummaryBody').innerHTML = `<tr><td style="font-weight:bold; text-align: left;">DBI Classified</td><td style="text-align:center;">${validTotal}</td></tr><tr><td style="font-weight:bold; text-align: left;">Children age > 5 years</td><td style="text-align:center;">${counts.Over5}</td></tr><tr><td style="font-weight:bold; text-align: left;">Implausible data</td><td style="text-align:center;">${counts.Implausible}</td></tr><tr><td style="font-weight:bold; text-align: left;">Data entry error</td><td style="text-align:center;">${counts.Error}</td></tr><tr style="background:#2e7d32; color:white; font-weight:bold"><td style="text-align: left;">Total (N)</td><td style="text-align:center;">${grandTotal}</td></tr>`;
+        
         if (chartInstance) chartInstance.destroy();
-        chartInstance = new Chart(document.getElementById('dbiChart').getContext('2d'), { type: 'doughnut', data: { labels: chartLabels, datasets: [{ data: chartData, backgroundColor: chartColors, hoverOffset: 12 }] }, options: { responsive: true, maintainAspectRatio: false, layout: { padding: 0 }, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 }, padding: 15 } } } } });
+        chartInstance = new Chart(document.getElementById('dbiChart').getContext('2d'), { 
+            type: 'doughnut', 
+            data: { labels: chartLabels, datasets: [{ data: chartData, backgroundColor: chartColors, hoverOffset: 12 }] }, 
+            options: { responsive: true, maintainAspectRatio: false, layout: { padding: 0 }, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 }, padding: 15 } } } } 
+        });
     }
 
     function exportTableToCSV() {
         let csv = []; let rows = document.querySelectorAll("#exportTable tr");
-        for (let i = 0; i < rows.length; i++) { let row = [], cols = rows[i].querySelectorAll("td, th"); for (let j = 0; j < cols.length; j++) row.push('"' + cols[j].innerText + '"'); csv.push(row.join(",")); }
+        for (let i = 0; i < rows.length; i++) { let row = [], cols = rows[i].querySelectorAll("td, th"); for (let j = 0; j < cols.length; j++) row.push('"' + cols[j].textContent + '"'); csv.push(row.join(",")); }
         let csvFile = new Blob([csv.join("\n")], { type: "text/csv" }); let downloadLink = document.createElement("a"); downloadLink.download = "DBI_Summary_Report.csv"; downloadLink.href = window.URL.createObjectURL(csvFile); downloadLink.style.display = "none"; document.body.appendChild(downloadLink); downloadLink.click(); document.body.removeChild(downloadLink);
     }
     
     function exportCalculatedDataToCSV() {
-        let csv = []; let rows = document.querySelectorAll("#spreadsheet tr");
-        for (let i = 2; i < rows.length; i++) { 
-            let row = [], cols = rows[i].querySelectorAll("td");
+        let csv = []; let rows = document.getElementById("tableBody").children;
+        for (let i = 0; i < rows.length; i++) { 
+            let cols = rows[i].children;
             if (cols.length > 0) {
-                let sn = cols[0].innerText; let fac = cols[1].querySelector("input") ? cols[1].querySelector("input").value : ""; let child = cols[2].querySelector("input") ? cols[2].querySelector("input").value : ""; let sDate = cols[3].querySelector("input") ? cols[3].querySelector("input").value : ""; let bDate = cols[4].querySelector("input") ? cols[4].querySelector("input").value : ""; let ageM = cols[5].innerText; let gender = cols[6].querySelector("select") ? cols[6].querySelector("select").value : ""; let wt = cols[7].querySelector("input") ? cols[7].querySelector("input").value : ""; let ht = cols[8].querySelector("input") ? cols[8].querySelector("input").value : ""; let wazZ = cols[9].innerText; let wazS = cols[10].innerText; let hazZ = cols[11].innerText; let hazS = cols[12].innerText; let whzZ = cols[13].innerText; let whzS = cols[14].innerText; let dbi = cols[15].innerText;
+                let sn = cols[0].textContent; let fac = cols[1].querySelector("input") ? cols[1].querySelector("input").value : ""; let child = cols[2].querySelector("input") ? cols[2].querySelector("input").value : ""; let sDate = cols[3].querySelector("input") ? cols[3].querySelector("input").value : ""; let bDate = cols[4].querySelector("input") ? cols[4].querySelector("input").value : ""; let ageM = cols[5].textContent; let gender = cols[6].querySelector("select") ? cols[6].querySelector("select").value : ""; let wt = cols[7].querySelector("input") ? cols[7].querySelector("input").value : ""; let ht = cols[8].querySelector("input") ? cols[8].querySelector("input").value : ""; let wazZ = cols[9].textContent; let wazS = cols[10].textContent; let hazZ = cols[11].textContent; let hazS = cols[12].textContent; let whzZ = cols[13].textContent; let whzS = cols[14].textContent; let dbi = cols[15].textContent;
                 if (!sDate && !bDate && !gender && !wt && !ht && !child && !fac) continue;
-                row.push(`"${sn}","${fac}","${child}","${sDate}","${bDate}","${ageM}","${gender}","${wt}","${ht}","${wazZ}","${wazS}","${hazZ}","${hazS}","${whzZ}","${whzS}","${dbi}"`); csv.push(row.join(","));
+                csv.push(`"${sn}","${fac}","${child}","${sDate}","${bDate}","${ageM}","${gender}","${wt}","${ht}","${wazZ}","${wazS}","${hazZ}","${hazS}","${whzZ}","${whzS}","${dbi}"`);
             }
         }
         let header = '"SN","Facility","Child Name","Survey Date","Birth Date","Age (Months)","Gender","Weight","Height","WAZ Z","WAZ Status","HAZ Z","HAZ Status","WHZ Z","WHZ Status","DBI Category"';
