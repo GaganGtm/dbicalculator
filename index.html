@@ -38,9 +38,9 @@
         }
 
         /* Scrollable Data Area */
-        .table-scroll-container { max-height: 65vh; overflow-y: auto; border: 1px solid #ccc; background: white; }
+        .table-scroll-container { max-height: 60vh; overflow-y: auto; border: 1px solid #ccc; background: white; }
 
-        /* FAST Table Design - Fixed layout & content visibility prevents browser lag on 10k rows */
+        /* FAST Table Design */
         table { border-collapse: collapse; width: 100%; table-layout: fixed; background: white;}
         th, td { border: 1px solid #ccc; padding: 5px; text-align: center; font-size: 11px; word-wrap: break-word; overflow: hidden; }
         #spreadsheet tbody tr { content-visibility: auto; contain-intrinsic-size: 32px; }
@@ -59,6 +59,12 @@
         .col-sn { width: 3%; } .col-fac { width: 10%; } .col-child { width: 10%; } .col-date { width: 7.5%; } .col-age { width: 4.5%; } .col-gen { width: 4.5%; } .col-wt { width: 5%; } .col-ht { width: 5%; } .col-z { width: 4%; }  .col-stat { width: 7%; } .col-dbi { width: 9%; }
 
         .dbi-cat { font-weight: normal !important; } .status-cell { font-weight: bold; }
+
+        /* Pagination Controls */
+        .pagination-controls { display: flex; justify-content: space-between; align-items: center; background: #e3f2fd; padding: 10px 15px; border: 1px solid #90caf9; border-radius: 4px; margin-top: 10px; }
+        .page-btn { background: #1976d2; color: white; border: none; padding: 6px 15px; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 12px; transition: 0.2s;}
+        .page-btn:disabled { background: #b0bec5; cursor: not-allowed; }
+        .page-btn:hover:not(:disabled) { background: #1565c0; }
 
         /* Summary Table Alternating Shading */
         #summaryBody tr:nth-child(even) { background-color: #f2f9f4; }
@@ -140,9 +146,16 @@
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                        <!-- Rows injected via Fast JS Engine -->
+                        <!-- Rows injected via Virtual Memory Engine -->
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Virtual Memory Pagination Controls -->
+            <div class="pagination-controls">
+                <button id="btnPrev" class="page-btn" onclick="prevPage()">◀ Previous 100 Rows</button>
+                <span id="pageInfo" style="font-weight: bold; font-size: 13px; color: #1976d2;">Page 1 of 1</span>
+                <button id="btnNext" class="page-btn" onclick="nextPage()">Next 100 Rows ▶</button>
             </div>
             
             <button onclick="addRow()" style="margin-top: 12px; padding: 8px 12px; background-color: #4285f4; color: white; border: none; cursor:pointer; font-weight:bold; border-radius: 4px; font-size: 12px;">+ Add Single Row</button>
@@ -147781,17 +147794,18 @@
 
     // ==========================================
 
-    let rowCount = 0;
     let chartInstance = null;
 
+    // --- VIRTUAL MEMORY STATE --- //
+    let globalData = [];
+    let currentPage = 1;
+    const rowsPerPage = 100;
+
     window.onload = () => { 
-        let initialHTML = "";
-        let emptyCalc = calculateLogic("", "", "", "", "", NaN, NaN);
         for(let i=1; i<=10; i++) {
-            rowCount++;
-            initialHTML += generateRowHTML(rowCount, "", "", "", "", "", "", "", emptyCalc);
+            globalData.push(createEmptyRow(i));
         }
-        document.getElementById('tableBody').innerHTML = initialHTML;
+        renderTable();
     };
 
     function switchTab(tabId, themeColor, bgColor) {
@@ -147809,7 +147823,37 @@
         if(tabId === 'summary') generateSummary();
     }
 
-    // --- ULTRA FAST ENGINE LOGIC --- //
+    // --- VIRTUAL PAGINATION ENGINE --- //
+    function createEmptyRow(id) {
+        return {
+            id: id, fac: "", child: "", sDate: "", bDate: "", gender: "", wt: "", ht: "",
+            calc: calculateLogic("", "", "", "", "", NaN, NaN)
+        };
+    }
+
+    function renderTable() {
+        let totalPages = Math.ceil(globalData.length / rowsPerPage) || 1;
+        if(currentPage > totalPages) currentPage = totalPages;
+        if(currentPage < 1) currentPage = 1;
+
+        let startIndex = (currentPage - 1) * rowsPerPage;
+        let endIndex = Math.min(startIndex + rowsPerPage, globalData.length);
+
+        let htmlBuffer = "";
+        for(let i = startIndex; i < endIndex; i++) {
+            htmlBuffer += generateRowHTML(globalData[i]);
+        }
+        document.getElementById('tableBody').innerHTML = htmlBuffer;
+
+        // Update Nav UI
+        document.getElementById('pageInfo').innerText = `Page ${currentPage} of ${totalPages} (Total Rows: ${globalData.length})`;
+        document.getElementById('btnPrev').disabled = currentPage === 1;
+        document.getElementById('btnNext').disabled = currentPage === totalPages;
+    }
+
+    function prevPage() { if(currentPage > 1) { currentPage--; renderTable(); } }
+    function nextPage() { let totalPages = Math.ceil(globalData.length / rowsPerPage); if(currentPage < totalPages) { currentPage++; renderTable(); } }
+
     function formatExcelDate(dateStr) { 
         if(!dateStr) return ""; 
         let d = new Date(dateStr); 
@@ -147838,30 +147882,20 @@
     function calculateLogic(fac, child, sDate, bDate, gender, w, h) {
         let out = { ageDays: -1, ageM: "", wazZ: "", wazS: "", hazZ: "", hazS: "", whzZ: "", whzS: "", dbi: "", dbiBg: "transparent", dbiColor: "black", facBg: "", childBg: "" };
         
-        // Blank row check
         if (!fac && !child && !sDate && !bDate && !gender && isNaN(w) && isNaN(h)) return out;
 
-        // Mandatory Field Validation
         if (!fac || !child) {
-            out.dbi = "Missing Name/Facility";
-            out.dbiBg = "#ffcdd2"; // Pink warning color
-            out.dbiColor = "black";
-            out.facBg = !fac ? "#ffcdd2" : "";
-            out.childBg = !child ? "#ffcdd2" : "";
-            return out;
+            out.dbi = "Missing Name/Facility"; out.dbiBg = "#ffcdd2"; out.dbiColor = "black";
+            out.facBg = !fac ? "#ffcdd2" : ""; out.childBg = !child ? "#ffcdd2" : ""; return out;
         }
 
-        if (!sDate || !bDate || !gender || isNaN(w) || isNaN(h)) {
-             out.dbi = "Missing Data"; 
-             return out;
-        }
+        if (!sDate || !bDate || !gender || isNaN(w) || isNaN(h)) { out.dbi = "Missing Data"; return out; }
         
         let sDateObj = new Date(sDate), todayObj = new Date(); todayObj.setHours(0,0,0,0);
         if (sDateObj > todayObj || sDateObj < new Date(bDate)) { out.dbi = "Date Error"; out.dbiBg = "#ffeb3b"; return out; }
         
         let ageDays = Math.floor((sDateObj - new Date(bDate)) / 86400000); 
-        out.ageDays = ageDays; 
-        out.ageM = Math.round(ageDays / 30.4375);
+        out.ageDays = ageDays; out.ageM = Math.round(ageDays / 30.4375);
         
         if (ageDays > 1856) { out.dbi = "> 5 years"; out.dbiBg = "#ffcc80"; return out; }
         if (h < 45) { out.dbi = "Length < 45cm"; out.dbiBg = "#e0e0e0"; return out; }
@@ -147883,7 +147917,6 @@
 
         let dbi = "Implausible data";
         
-        // Category J Logic Added
         if (wazStat === "Normal" && hazStat === "Normal" && whzStat === "Normal") dbi = "A (Normal)";
         else if (wazStat === "Normal" && hazStat === "Normal" && (whzStat === "MAM" || whzStat === "SAM")) dbi = "B (Only Wasting)";
         else if (wazStat === "Normal" && hazStat === "Normal" && whzStat === "Obese") dbi = "I (Only Obese)";
@@ -147903,24 +147936,25 @@
         return out;
     }
 
-    function generateRowHTML(id, fac, child, sDate, bDate, gender, wt, ht, calc) {
+    function generateRowHTML(row) {
         let todayStr = new Date().toISOString().split('T')[0];
-        return `<tr id="row-${id}" data-age-days="${calc.ageDays}">
-            <td class="col-sn">${id}</td>
-            <td class="col-fac"><input type="text" class="facility" value="${fac}" style="background-color:${calc.facBg}" onkeyup="calcRow(${id})" onchange="calcRow(${id})"></td>
-            <td class="col-child"><input type="text" class="childName" value="${child}" style="background-color:${calc.childBg}" onkeyup="calcRow(${id})" onchange="calcRow(${id})"></td>
-            <td class="col-date"><input type="date" class="surveyDate" value="${sDate}" max="${todayStr}" onchange="calcRow(${id})"></td>
-            <td class="col-date"><input type="date" class="dob" value="${bDate}" max="${todayStr}" onchange="calcRow(${id})"></td>
+        let calc = row.calc;
+        return `<tr id="row-${row.id}" data-age-days="${calc.ageDays}">
+            <td class="col-sn">${row.id}</td>
+            <td class="col-fac"><input type="text" class="facility" value="${row.fac}" style="background-color:${calc.facBg}" onkeyup="updateRowData(${row.id})" onchange="updateRowData(${row.id})"></td>
+            <td class="col-child"><input type="text" class="childName" value="${row.child}" style="background-color:${calc.childBg}" onkeyup="updateRowData(${row.id})" onchange="updateRowData(${row.id})"></td>
+            <td class="col-date"><input type="date" class="surveyDate" value="${row.sDate}" max="${todayStr}" onchange="updateRowData(${row.id})"></td>
+            <td class="col-date"><input type="date" class="dob" value="${row.bDate}" max="${todayStr}" onchange="updateRowData(${row.id})"></td>
             <td class="col-age age-months status-cell">${calc.ageM}</td>
             <td class="col-gen">
-                <select class="gender" onchange="calcRow(${id})">
+                <select class="gender" onchange="updateRowData(${row.id})">
                     <option value="">Select</option>
-                    <option value="m" ${gender==='m'?'selected':''}>m</option>
-                    <option value="f" ${gender==='f'?'selected':''}>f</option>
+                    <option value="m" ${row.gender==='m'?'selected':''}>m</option>
+                    <option value="f" ${row.gender==='f'?'selected':''}>f</option>
                 </select>
             </td>
-            <td class="col-wt"><input type="number" class="weight" step="0.01" value="${wt}" onkeyup="calcRow(${id})" onchange="calcRow(${id})"></td>
-            <td class="col-ht"><input type="number" class="height" step="0.1" value="${ht}" onkeyup="calcRow(${id})" onchange="calcRow(${id})"></td>
+            <td class="col-wt"><input type="number" class="weight" step="0.01" value="${row.wt}" onkeyup="updateRowData(${row.id})" onchange="updateRowData(${row.id})"></td>
+            <td class="col-ht"><input type="number" class="height" step="0.1" value="${row.ht}" onkeyup="updateRowData(${row.id})" onchange="updateRowData(${row.id})"></td>
             <td class="col-z waz-z">${calc.wazZ}</td><td class="col-stat waz-stat">${calc.wazS}</td>
             <td class="col-z haz-z">${calc.hazZ}</td><td class="col-stat haz-stat">${calc.hazS}</td>
             <td class="col-z whz-z">${calc.whzZ}</td><td class="col-stat whz-stat">${calc.whzS}</td>
@@ -147929,13 +147963,13 @@
     }
 
     function addRow() {
-        rowCount++;
-        let emptyCalc = calculateLogic("", "", "", "", "", NaN, NaN);
-        let html = generateRowHTML(rowCount, "", "", "", "", "", "", "", emptyCalc);
-        document.getElementById('tableBody').insertAdjacentHTML('beforeend', html);
+        let newId = globalData.length > 0 ? globalData[globalData.length-1].id + 1 : 1;
+        globalData.push(createEmptyRow(newId));
+        currentPage = Math.ceil(globalData.length / rowsPerPage);
+        renderTable();
     }
 
-    // High Performance Bulk 10,000 Paste Processor
+    // Fast memory push during bulk paste
     function processBulkPaste() {
         let text = document.getElementById('bulkPasteArea').value.trim();
         if(!text) return;
@@ -147943,19 +147977,15 @@
         let lines = text.split('\n');
         if (lines.length > 10000) { alert("Max 10,000 rows limit reached. Please paste in batches of 10,000."); return; }
         
-        if (rowCount === 10 && !document.querySelector('.childName').value && !document.querySelector('.facility').value) {
-            document.getElementById('tableBody').innerHTML = "";
-            rowCount = 0;
-        }
+        let isInitialEmpty = globalData.length === 10 && globalData.every(r => !r.child && !r.fac && !r.sDate && !r.wt && !r.ht);
+        if (isInitialEmpty) { globalData = []; }
 
-        let htmlBuffer = "";
         let addedCount = 0;
         
         lines.forEach(line => {
             let cols = line.split('\t');
             if(cols.length >= 7) {
-                rowCount++;
-                addedCount++;
+                let newId = globalData.length > 0 ? globalData[globalData.length-1].id + 1 : 1;
                 let fac = cols[0] ? cols[0].trim() : "";
                 let child = cols[1] ? cols[1].trim() : "";
                 let sDate = formatExcelDate(cols[2]), bDate = formatExcelDate(cols[3]);
@@ -147963,51 +147993,57 @@
                 let wt = parseFloat(cols[5]), ht = parseFloat(cols[6]);
                 
                 let calc = calculateLogic(fac, child, sDate, bDate, gender, wt, ht);
-                
-                htmlBuffer += generateRowHTML(rowCount, fac, child, sDate, bDate, gender, isNaN(wt) ? "" : wt, isNaN(ht) ? "" : ht, calc);
+                globalData.push({ id: newId, fac, child, sDate, bDate, gender, wt: isNaN(wt)?"":wt, ht: isNaN(ht)?"":ht, calc });
+                addedCount++;
             }
         });
         
-        document.getElementById('tableBody').insertAdjacentHTML('beforeend', htmlBuffer);
         document.getElementById('bulkPasteArea').value = "";
+        currentPage = Math.ceil(globalData.length / rowsPerPage) || 1;
+        renderTable();
         alert(`Successfully imported ${addedCount} rows.`);
     }
 
-    // Handled typed changes using ultra-fast textContent 
-    function calcRow(id) {
-        const row = document.getElementById(`row-${id}`);
-        const fac = row.querySelector('.facility').value.trim();
-        const child = row.querySelector('.childName').value.trim();
-        const sDate = row.querySelector('.surveyDate').value, bDate = row.querySelector('.dob').value, gender = row.querySelector('.gender').value;
-        let w = parseFloat(row.querySelector('.weight').value), h = parseFloat(row.querySelector('.height').value);
+    // Instantly sync UI changes into Virtual Memory
+    function updateRowData(id) {
+        let rowIndex = globalData.findIndex(r => r.id === id);
+        if(rowIndex === -1) return;
+        let rowObj = globalData[rowIndex];
+
+        let tr = document.getElementById(`row-${id}`);
+        rowObj.fac = tr.querySelector('.facility').value.trim();
+        rowObj.child = tr.querySelector('.childName').value.trim();
+        rowObj.sDate = tr.querySelector('.surveyDate').value;
+        rowObj.bDate = tr.querySelector('.dob').value;
+        rowObj.gender = tr.querySelector('.gender').value;
+        rowObj.wt = tr.querySelector('.weight').value;
+        rowObj.ht = tr.querySelector('.height').value;
         
-        let calc = calculateLogic(fac, child, sDate, bDate, gender, w, h);
+        let calc = calculateLogic(rowObj.fac, rowObj.child, rowObj.sDate, rowObj.bDate, rowObj.gender, parseFloat(rowObj.wt), parseFloat(rowObj.ht));
+        rowObj.calc = calc;
         
-        row.querySelector('.facility').style.backgroundColor = calc.facBg;
-        row.querySelector('.childName').style.backgroundColor = calc.childBg;
+        tr.querySelector('.facility').style.backgroundColor = calc.facBg;
+        tr.querySelector('.childName').style.backgroundColor = calc.childBg;
+        tr.querySelector('.age-months').textContent = calc.ageM;
+        tr.querySelector('.waz-z').textContent = calc.wazZ; tr.querySelector('.waz-stat').textContent = calc.wazS;
+        tr.querySelector('.haz-z').textContent = calc.hazZ; tr.querySelector('.haz-stat').textContent = calc.hazS;
+        tr.querySelector('.whz-z').textContent = calc.whzZ; tr.querySelector('.whz-stat').textContent = calc.whzS;
         
-        row.dataset.ageDays = calc.ageDays;
-        row.querySelector('.age-months').textContent = calc.ageM;
-        row.querySelector('.waz-z').textContent = calc.wazZ; row.querySelector('.waz-stat').textContent = calc.wazS;
-        row.querySelector('.haz-z').textContent = calc.hazZ; row.querySelector('.haz-stat').textContent = calc.hazS;
-        row.querySelector('.whz-z').textContent = calc.whzZ; row.querySelector('.whz-stat').textContent = calc.whzS;
-        
-        const outDbi = row.querySelector('.dbi-cat');
+        const outDbi = tr.querySelector('.dbi-cat');
         outDbi.textContent = calc.dbi;
         outDbi.style.backgroundColor = calc.dbiBg;
         outDbi.style.color = calc.dbiColor;
     }
 
-    /* Fast Summary Dashboard Logic */
+    /* Virtual Memory Summary Logic */
     function generateSummary() {
         let counts = { A:0, B:0, C:0, D:0, E:0, F:0, G:0, H:0, I:0, J:0, Over5:0, Missing:0, Implausible:0, Error:0 }; 
         let validTotal = 0; let grandTotal = 0;
         
-        const rows = document.getElementById('tableBody').children;
-        for(let i=0; i<rows.length; i++) {
-            let r = rows[i];
-            let val = r.lastElementChild.textContent.trim(); 
-            if (!val) continue; 
+        globalData.forEach(r => {
+            let val = r.calc.dbi.trim(); 
+            if(!r.fac && !r.child && !r.sDate && !r.bDate && !r.gender && r.wt==="" && r.ht==="") return;
+            if (!val) return;
             
             if(val.startsWith("A (")) { counts.A++; validTotal++; grandTotal++; } 
             else if(val.startsWith("B (")) { counts.B++; validTotal++; grandTotal++; } 
@@ -148023,7 +148059,7 @@
             else if(val.includes("Implausible")) { counts.Implausible++; grandTotal++; } 
             else if(val.includes("Missing")) { counts.Missing++; grandTotal++; } 
             else { counts.Error++; grandTotal++; } 
-        }
+        });
 
         const categories = [
             { id: "A", name: "Normal", bg: "#4caf50" }, 
@@ -148065,15 +148101,13 @@
     }
     
     function exportCalculatedDataToCSV() {
-        let csv = []; let rows = document.getElementById("tableBody").children;
-        for (let i = 0; i < rows.length; i++) { 
-            let cols = rows[i].children;
-            if (cols.length > 0) {
-                let sn = cols[0].textContent; let fac = cols[1].querySelector("input") ? cols[1].querySelector("input").value.trim() : ""; let child = cols[2].querySelector("input") ? cols[2].querySelector("input").value.trim() : ""; let sDate = cols[3].querySelector("input") ? cols[3].querySelector("input").value : ""; let bDate = cols[4].querySelector("input") ? cols[4].querySelector("input").value : ""; let ageM = cols[5].textContent; let gender = cols[6].querySelector("select") ? cols[6].querySelector("select").value : ""; let wt = cols[7].querySelector("input") ? cols[7].querySelector("input").value : ""; let ht = cols[8].querySelector("input") ? cols[8].querySelector("input").value : ""; let wazZ = cols[9].textContent; let wazS = cols[10].textContent; let hazZ = cols[11].textContent; let hazS = cols[12].textContent; let whzZ = cols[13].textContent; let whzS = cols[14].textContent; let dbi = cols[15].textContent;
-                if (!sDate && !bDate && !gender && !wt && !ht && !child && !fac) continue;
-                csv.push(`"${sn}","${fac}","${child}","${sDate}","${bDate}","${ageM}","${gender}","${wt}","${ht}","${wazZ}","${wazS}","${hazZ}","${hazS}","${whzZ}","${whzS}","${dbi}"`);
-            }
-        }
+        let csv = [];
+        globalData.forEach(r => {
+            let c = r.calc;
+            if (!r.sDate && !r.bDate && !r.gender && r.wt==="" && r.ht==="" && !r.child && !r.fac) return; 
+            csv.push(`"${r.id}","${r.fac}","${r.child}","${r.sDate}","${r.bDate}","${c.ageM}","${r.gender}","${r.wt}","${r.ht}","${c.wazZ}","${c.wazS}","${c.hazZ}","${c.hazS}","${c.whzZ}","${c.whzS}","${c.dbi}"`);
+        });
+        
         let header = '"SN","Facility","Child Name","Survey Date","Birth Date","Age (Months)","Gender","Weight","Height","WAZ Z","WAZ Status","HAZ Z","HAZ Status","WHZ Z","WHZ Status","DBI Category"';
         let csvFile = new Blob([[header, ...csv].join("\n")], { type: "text/csv" }); let downloadLink = document.createElement("a"); downloadLink.download = "DBI_Calculated_Data.csv"; downloadLink.href = window.URL.createObjectURL(csvFile); downloadLink.style.display = "none"; document.body.appendChild(downloadLink); downloadLink.click(); document.body.removeChild(downloadLink);
     }
