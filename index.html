@@ -89,13 +89,13 @@
         .dl-link:hover { color: #d32f2f; }
 
         /* --- POPULATION STATS & CURVES CSS --- */
-        .stat-section { display: flex; flex-wrap: wrap; gap: 20px; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .stat-section { display: flex; flex-direction: row; flex-wrap: wrap; gap: 20px; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .stat-header { width: 100%; font-size: 18px; font-weight: bold; color: #673ab7; border-bottom: 2px solid #ede7f6; padding-bottom: 8px; margin-bottom: 10px; text-transform: uppercase;}
         .stat-chart-container { flex: 1.5; min-width: 400px; height: 350px; position: relative;}
-        .stat-text-container { flex: 1; min-width: 350px; background: #fafafa; border: 1px solid #ddd; padding: 15px; font-family: "Courier New", Courier, monospace; font-size: 13px; white-space: pre-wrap; line-height: 1.4; color: #333; overflow-x: auto;}
+        .stat-text-container { flex: 1; min-width: 350px; background: #fafafa; border: 1px solid #ddd; border-radius: 5px; padding: 15px; font-family: "Courier New", Courier, monospace; font-size: 13px; white-space: pre-wrap; line-height: 1.4; color: #333; overflow-x: auto;}
         
         .scatter-container { width: 100%; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .scatter-wrapper { position: relative; width: 100%; height: 500px; margin-top: 15px; }
+        .scatter-wrapper { position: relative; width: 100%; height: 600px; margin-top: 15px; }
 
         /* Guide Grid Layouts */
         .guide-grid-2, .guide-grid-3 { display: grid; gap: 20px; margin-bottom: 20px; }
@@ -186,7 +186,7 @@
                 <div class="chart-container">
                     <div class="header-with-btn">
                         <h3 style="margin: 0; color: #2e7d32; font-size: 15px;">Cohort Summary - Double Burden Index</h3>
-                        <button class="export-btn" onclick="exportChartAsPNG()" style="background-color: #2e7d32;">📥 Download Chart (PNG)</button>
+                        <button class="export-btn" onclick="exportChartAsPNG('dbiChart', 'DBI_Cohort_Chart.png')" style="background-color: #2e7d32;">📥 Download Chart (PNG)</button>
                     </div>
                     <div class="chart-wrapper"><canvas id="dbiChart"></canvas></div>
                 </div>
@@ -230,8 +230,11 @@
 
             <!-- Section 4: DBI Scatter Plot -->
             <div class="scatter-container">
-                <div class="stat-header">Double Burden Index - Clinical Population Scatter Plot</div>
-                <p style="font-size: 12px; color: #555; font-style: italic; margin-top: 0;">This plot maps every child's Stunting severity (X-axis) against their Wasting/Obesity severity (Y-axis). Colors represent the A-J Classification.</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ede7f6; padding-bottom: 8px; margin-bottom: 10px;">
+                    <div class="stat-header" style="border: none; padding: 0; margin: 0;">Conceptual Density Plot - Double Burden Index</div>
+                    <button class="export-btn" onclick="exportChartAsPNG('scatterChart', 'DBI_Conceptual_Density_Plot.png')" style="background-color: #673ab7;">📥 Download Chart (PNG)</button>
+                </div>
+                <p style="font-size: 13px; color: #444; font-style: italic; margin-top: 0;">This chart maps children to their A-J Classification zones based on the Phadke, Gautam, Nair, and Rade (2026) conceptual framework. Dots are micro-jittered to visually represent population density and intensity within each double-burden category.</p>
                 <div class="scatter-wrapper"><canvas id="scatterChart"></canvas></div>
             </div>
 
@@ -148135,7 +148138,6 @@
 
     function drawBellChart(canvasId, chartInst, dataMetrics, title) {
         if(chartInst) chartInst.destroy();
-        
         let whoCurve = buildGaussianCurve(0, 1);
         let sampleCurve = buildGaussianCurve(dataMetrics.mean, dataMetrics.sd);
 
@@ -148149,20 +148151,14 @@
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
-                scales: {
-                    x: { type: 'linear', min: -5, max: 5, title: { display: true, text: 'Z-score' } },
-                    y: { title: { display: true, text: 'Density' } }
-                },
+                scales: { x: { type: 'linear', min: -5, max: 5, title: { display: true, text: 'Z-score' } }, y: { title: { display: true, text: 'Density' } } },
                 plugins: { title: { display: true, text: title, font: {size: 16} }, legend: { position: 'top' } }
             }
         });
     }
 
     function formatLine(label, count, n, metrics) {
-        let l = label.padEnd(8, ' ');
-        let cText = `(${count})`.padStart(6, ' ');
-        let nText = `n=${n}`.padEnd(6, ' ');
-        let perc = metrics.str.padStart(6, ' ');
+        let l = label.padEnd(8, ' '); let cText = `(${count})`.padStart(6, ' '); let nText = `n=${n}`.padEnd(6, ' '); let perc = metrics.str.padStart(6, ' ');
         return `${l} (${nText}): ${cText}  ${perc}  (${metrics.ci} 95% CI)\n`;
     }
 
@@ -148178,21 +148174,10 @@
 
         document.getElementById('wazStatsText').innerText = 
             `Main survey results for WAZ:\n\n` +
-            `Prevalence of underweight (<-2 z-score)\n` +
-            formatLine('All', uAll, wM.n, calcPrev(uAll, wM.n)) +
-            formatLine('Boys', uB, wB.n, calcPrev(uB, wB.n)) +
-            formatLine('Girls', uG, wG.n, calcPrev(uG, wG.n)) + `\n` +
-            `Prevalence of moderate underweight (<-2 and >=-3 z-score)\n` +
-            formatLine('All', muAll, wM.n, calcPrev(muAll, wM.n)) +
-            formatLine('Boys', muB, wB.n, calcPrev(muB, wB.n)) +
-            formatLine('Girls', muG, wG.n, calcPrev(muG, wG.n)) + `\n` +
-            `Prevalence of severe underweight (<-3 z-score)\n` +
-            formatLine('All', suAll, wM.n, calcPrev(suAll, wM.n)) +
-            formatLine('Boys', suB, wB.n, calcPrev(suB, wB.n)) +
-            formatLine('Girls', suG, wG.n, calcPrev(suG, wG.n)) + `\n` +
-            `mean±SD of WAZ (n=${wM.n}): ${wM.mean.toFixed(2)} ± ${wM.sd.toFixed(2)}\n` +
-            `z-scores not available: ${wazData.missing}\n` +
-            `z-scores out of range : ${wazData.flags}`;
+            `Prevalence of underweight (<-2 z-score)\n` + formatLine('All', uAll, wM.n, calcPrev(uAll, wM.n)) + formatLine('Boys', uB, wB.n, calcPrev(uB, wB.n)) + formatLine('Girls', uG, wG.n, calcPrev(uG, wG.n)) + `\n` +
+            `Prevalence of moderate underweight (<-2 and >=-3 z-score)\n` + formatLine('All', muAll, wM.n, calcPrev(muAll, wM.n)) + formatLine('Boys', muB, wB.n, calcPrev(muB, wB.n)) + formatLine('Girls', muG, wG.n, calcPrev(muG, wG.n)) + `\n` +
+            `Prevalence of severe underweight (<-3 z-score)\n` + formatLine('All', suAll, wM.n, calcPrev(suAll, wM.n)) + formatLine('Boys', suB, wB.n, calcPrev(suB, wB.n)) + formatLine('Girls', suG, wG.n, calcPrev(suG, wG.n)) + `\n` +
+            `mean±SD of WAZ (n=${wM.n}): ${wM.mean.toFixed(2)} ± ${wM.sd.toFixed(2)}\n` + `z-scores not available: ${wazData.missing}\n` + `z-scores out of range : ${wazData.flags}`;
 
         // HAZ (Stunting)
         let hazData = getStatsArr('rawHaz');
@@ -148205,21 +148190,10 @@
 
         document.getElementById('hazStatsText').innerText = 
             `Main survey results for HAZ:\n\n` +
-            `Prevalence of stunting (<-2 z-score)\n` +
-            formatLine('All', sAll, hM.n, calcPrev(sAll, hM.n)) +
-            formatLine('Boys', sB, hB.n, calcPrev(sB, hB.n)) +
-            formatLine('Girls', sG, hG.n, calcPrev(sG, hG.n)) + `\n` +
-            `Prevalence of moderate stunting (<-2 and >=-3 z-score)\n` +
-            formatLine('All', msAll, hM.n, calcPrev(msAll, hM.n)) +
-            formatLine('Boys', msB, hB.n, calcPrev(msB, hB.n)) +
-            formatLine('Girls', msG, hG.n, calcPrev(msG, hG.n)) + `\n` +
-            `Prevalence of severe stunting (<-3 z-score)\n` +
-            formatLine('All', ssAll, hM.n, calcPrev(ssAll, hM.n)) +
-            formatLine('Boys', ssB, hB.n, calcPrev(ssB, hB.n)) +
-            formatLine('Girls', ssG, hG.n, calcPrev(ssG, hG.n)) + `\n` +
-            `mean±SD of HAZ (n=${hM.n}): ${hM.mean.toFixed(2)} ± ${hM.sd.toFixed(2)}\n` +
-            `z-scores not available: ${hazData.missing}\n` +
-            `z-scores out of range : ${hazData.flags}`;
+            `Prevalence of stunting (<-2 z-score)\n` + formatLine('All', sAll, hM.n, calcPrev(sAll, hM.n)) + formatLine('Boys', sB, hB.n, calcPrev(sB, hB.n)) + formatLine('Girls', sG, hG.n, calcPrev(sG, hG.n)) + `\n` +
+            `Prevalence of moderate stunting (<-2 and >=-3 z-score)\n` + formatLine('All', msAll, hM.n, calcPrev(msAll, hM.n)) + formatLine('Boys', msB, hB.n, calcPrev(msB, hB.n)) + formatLine('Girls', msG, hG.n, calcPrev(msG, hG.n)) + `\n` +
+            `Prevalence of severe stunting (<-3 z-score)\n` + formatLine('All', ssAll, hM.n, calcPrev(ssAll, hM.n)) + formatLine('Boys', ssB, hB.n, calcPrev(ssB, hB.n)) + formatLine('Girls', ssG, hG.n, calcPrev(ssG, hG.n)) + `\n` +
+            `mean±SD of HAZ (n=${hM.n}): ${hM.mean.toFixed(2)} ± ${hM.sd.toFixed(2)}\n` + `z-scores not available: ${hazData.missing}\n` + `z-scores out of range : ${hazData.flags}`;
 
         // WHZ (Wasting)
         let whzData = getStatsArr('rawWhz');
@@ -148232,53 +148206,69 @@
 
         document.getElementById('whzStatsText').innerText = 
             `Main survey results for WHZ:\n\n` +
-            `Prevalence of global acute malnutrition (<-2 z-score)\n` +
-            formatLine('All', waAll, whM.n, calcPrev(waAll, whM.n)) +
-            formatLine('Boys', waB, whB.n, calcPrev(waB, whB.n)) +
-            formatLine('Girls', waG, whG.n, calcPrev(waG, whG.n)) + `\n` +
-            `Prevalence of moderate acute malnutrition (<-2 and >=-3 z-score)\n` +
-            formatLine('All', mwAll, whM.n, calcPrev(mwAll, whM.n)) +
-            formatLine('Boys', mwB, whB.n, calcPrev(mwB, whB.n)) +
-            formatLine('Girls', mwG, whG.n, calcPrev(mwG, whG.n)) + `\n` +
-            `Prevalence of severe acute malnutrition (<-3 z-score)\n` +
-            formatLine('All', swAll, whM.n, calcPrev(swAll, whM.n)) +
-            formatLine('Boys', swB, whB.n, calcPrev(swB, whB.n)) +
-            formatLine('Girls', swG, whG.n, calcPrev(swG, whG.n)) + `\n` +
-            `mean±SD of WHZ (n=${whM.n}): ${whM.mean.toFixed(2)} ± ${whM.sd.toFixed(2)}\n` +
-            `z-scores not available: ${whzData.missing}\n` +
-            `z-scores out of range : ${whzData.flags}`;
+            `Prevalence of global acute malnutrition (<-2 z-score)\n` + formatLine('All', waAll, whM.n, calcPrev(waAll, whM.n)) + formatLine('Boys', waB, whB.n, calcPrev(waB, whB.n)) + formatLine('Girls', waG, whG.n, calcPrev(waG, whG.n)) + `\n` +
+            `Prevalence of moderate acute malnutrition (<-2 and >=-3 z-score)\n` + formatLine('All', mwAll, whM.n, calcPrev(mwAll, whM.n)) + formatLine('Boys', mwB, whB.n, calcPrev(mwB, whB.n)) + formatLine('Girls', mwG, whG.n, calcPrev(mwG, whG.n)) + `\n` +
+            `Prevalence of severe acute malnutrition (<-3 z-score)\n` + formatLine('All', swAll, whM.n, calcPrev(swAll, whM.n)) + formatLine('Boys', swB, whB.n, calcPrev(swB, whB.n)) + formatLine('Girls', swG, whG.n, calcPrev(swG, whG.n)) + `\n` +
+            `mean±SD of WHZ (n=${whM.n}): ${whM.mean.toFixed(2)} ± ${whM.sd.toFixed(2)}\n` + `z-scores not available: ${whzData.missing}\n` + `z-scores out of range : ${whzData.flags}`;
 
-        // Scatter Plot Generation
+        // CONCEPTUAL DENSITY SCATTER PLOT
         let scatterDatasets = {};
         ['A','B','C','D','E','F','G','H','I','J'].forEach(cat => {
-            scatterDatasets[cat] = { label: `Category ${cat}`, data: [], backgroundColor: catColors[cat], pointRadius: 4, hoverRadius: 7 };
+            scatterDatasets[cat] = { label: `Category ${cat}`, data: [], backgroundColor: catColors[cat], pointRadius: 3, hoverRadius: 5 };
         });
 
+        // The Conceptual Map Zones (X = HAZ axis, Y = WAZ axis conceptually)
+        const zoneMap = {
+            'A': {x: 4.0, y: 3.0}, 'B': {x: 6.5, y: 3.0}, 'C': {x: 3.0, y: -3.0}, 'D': {x: -1.5, y: -3.0}, 'E': {x: -4.0, y: -3.0},
+            'F': {x: -4.0, y: 3.0}, 'G': {x: 1.5, y: -0.5}, 'H': {x: -1.5, y: 3.0}, 'I': {x: 1.5, y: 3.0}, 'J': {x: -1.5, y: 0.5}
+        };
+
         globalData.forEach(r => {
-            if(r.calc.rawHaz !== null && r.calc.rawWhz !== null && r.calc.dbi.match(/^[A-J] \(/)) {
+            if(r.calc.dbi.match(/^[A-J] \(/)) {
                 let cat = r.calc.dbi.charAt(0);
-                scatterDatasets[cat].data.push({ x: r.calc.rawHaz, y: r.calc.rawWhz, child: r.child || "Unnamed", id: r.id });
+                let base = zoneMap[cat];
+                // Apply a random jitter within a precise bounding box to create the density cloud
+                let jx = base.x + (Math.random() * 1.6 - 0.8);
+                let jy = base.y + (Math.random() * 1.6 - 0.8);
+                scatterDatasets[cat].data.push({ x: jx, y: jy, child: r.child || "Unnamed", id: r.id });
             }
         });
+
+        // The Framework Grid Lines
+        let frameworkLines = [
+            { type: 'line', label: 'Ht. for Age Axis', data: [{x:-6, y:0}, {x:8, y:0}], borderColor: '#9e9e9e', borderWidth: 2, pointRadius: 0, fill: false },
+            { type: 'line', label: 'Wt. for Age Axis', data: [{x:0, y:-5}, {x:0, y:5}], borderColor: '#9e9e9e', borderWidth: 2, pointRadius: 0, fill: false },
+            { type: 'line', label: 'Wt. for Ht. Diagonal', data: [{x:-5, y:-5}, {x:7, y:7}], borderColor: '#9e9e9e', borderWidth: 2, pointRadius: 0, fill: false },
+            { type: 'line', label: 'Wt. for Ht. +2SD Curve', data: [{x:-6, y:4}, {x:-3, y:1}, {x:-1.5, y:0}, {x:0, y:0.5}, {x:2, y:2}, {x:5, y:5}], tension: 0.4, borderColor: '#9e9e9e', borderWidth: 2, borderDash: [5,5], pointRadius: 0, fill: false }
+        ];
+
+        let finalDatasets = frameworkLines.concat(Object.values(scatterDatasets).filter(d => d.data.length > 0));
 
         if(scatterChartInst) scatterChartInst.destroy();
         scatterChartInst = new Chart(document.getElementById('scatterChart').getContext('2d'), {
             type: 'scatter',
-            data: { datasets: Object.values(scatterDatasets).filter(d => d.data.length > 0) },
+            data: { datasets: finalDatasets },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 scales: {
-                    x: { title: { display: true, text: 'HAZ (Stunting Severity) →', font: {size: 14, weight: 'bold'} }, min: -6, max: 4 },
-                    y: { title: { display: true, text: '← Wasting | WHZ | Obesity →', font: {size: 14, weight: 'bold'} }, min: -5, max: 5 }
+                    x: { display: false, min: -6, max: 8 },
+                    y: { display: false, min: -5, max: 5 }
                 },
                 plugins: {
                     legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 10 } },
-                    tooltip: { callbacks: { label: (ctx) => `SN ${ctx.raw.id} (${ctx.raw.child}): HAZ ${ctx.raw.x.toFixed(2)}, WHZ ${ctx.raw.y.toFixed(2)}` } }
+                    tooltip: { callbacks: { label: (ctx) => {
+                        if(ctx.dataset.type === 'line') return false; // Disable tooltip for gridlines
+                        return `SN ${ctx.raw.id} (${ctx.raw.child})`; 
+                    }}}
                 }
             }
         });
     }
 
+    function exportChartAsPNG(canvasId, filename) {
+        let imageURI = document.getElementById(canvasId).toDataURL("image/png"); let downloadLink = document.createElement('a'); downloadLink.download = filename; downloadLink.href = imageURI; downloadLink.style.display = 'none'; document.body.appendChild(downloadLink); downloadLink.click(); document.body.removeChild(downloadLink);
+    }
+    
     function downloadSpecificCSV(categoryType) {
         let csv = [];
         globalData.forEach(r => {
@@ -148327,10 +148317,6 @@
         
         let header = '"SN","Facility","Child Name","Survey Date","Birth Date","Age (Months)","Gender","Weight","Height","WAZ Z","WAZ Status","HAZ Z","HAZ Status","WHZ Z","WHZ Status","DBI Category"';
         let csvFile = new Blob([[header, ...csv].join("\n")], { type: "text/csv" }); let downloadLink = document.createElement("a"); downloadLink.download = "DBI_Calculated_Data.csv"; downloadLink.href = window.URL.createObjectURL(csvFile); downloadLink.style.display = "none"; document.body.appendChild(downloadLink); downloadLink.click(); document.body.removeChild(downloadLink);
-    }
-    
-    function exportChartAsPNG() {
-        let imageURI = document.getElementById('dbiChart').toDataURL("image/png"); let downloadLink = document.createElement('a'); downloadLink.download = 'DBI_Cohort_Chart.png'; downloadLink.href = imageURI; downloadLink.style.display = 'none'; document.body.appendChild(downloadLink); downloadLink.click(); document.body.removeChild(downloadLink);
     }
 </script>
 </body>
