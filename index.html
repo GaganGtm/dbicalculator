@@ -48,21 +48,21 @@
         #spreadsheet tbody tr:nth-child(even) { background-color: #eaf1fb; } 
         #spreadsheet tbody tr:nth-child(odd) { background-color: #ffffff; }
         
-        input, select { width: 95%; box-sizing: border-box; padding: 4px; border: 1px solid #bbb; font-size: 11px; background-color: rgba(255,255,255,0.8); border-radius: 3px;}
-        input[type="date"] { padding: 4px 1px; font-size: 10.5px; } /* Ensures the year isn't clipped by input padding */
+        input, select { width: 100%; box-sizing: border-box; padding: 4px 2px; font-size: 11px; background-color: rgba(255,255,255,0.8); border-radius: 3px; border: 1px solid #bbb;}
+        input[type="date"] { font-size: 10px; letter-spacing: -0.5px; padding: 4px 0px; } /* Ensures full year fits in box */
         
-        /* Column Widths (Adjusted for full date visibility) */
+        /* Column Widths (Highly Optimized for Data Sizing) */
         .col-sn { width: 2%; } 
-        .col-fac { width: 9%; } 
-        .col-child { width: 9%; } 
-        .col-date { width: 11.5%; } /* Increased width for full MM/DD/YYYY view */
+        .col-fac { width: 8%; } 
+        .col-child { width: 8%; } 
+        .col-date { width: 11%; } 
         .col-age { width: 3%; } 
-        .col-gen { width: 4%; } 
+        .col-gen { width: 3.5%; } 
         .col-wt { width: 4.5%; } 
         .col-ht { width: 4.5%; } 
         .col-z { width: 3.5%; }  
         .col-stat { width: 6.5%; } 
-        .col-dbi { width: 11%; }
+        .col-dbi { width: 14.5%; }
 
         .dbi-cat { font-weight: normal !important; } .status-cell { font-weight: bold; }
 
@@ -147984,7 +147984,7 @@
 
         out.dbi = dbi;
         if (dbi.startsWith("A (")) { out.dbiBg = "#4caf50"; out.dbiColor = "white"; } 
-        else if (dbi.startsWith("D (")) { out.dbiBg = "#f44336"; out.dbiColor = "white"; }
+        else if (dbi.startsWith("D (")) { out.dbiBg = "#b71c1c"; out.dbiColor = "white"; }
         else if (dbi.startsWith("J (")) { out.dbiBg = "#795548"; out.dbiColor = "white"; }
         
         return out;
@@ -148109,9 +148109,9 @@
 
         const categories = [
             { id: "A", name: "Normal", bg: "#4caf50" }, 
-            { id: "B", name: "Only Wasting", bg: "#8bc34a" }, 
+            { id: "B", name: "Only Wasting", bg: "#e53935" }, 
             { id: "C", name: "Underweight + Wasting", bg: "#ff9800" }, 
-            { id: "D", name: "Underweight + Stunting + Wasting", bg: "#f44336" }, 
+            { id: "D", name: "Underweight + Stunting + Wasting", bg: "#b71c1c" }, 
             { id: "E", name: "Underweight + Stunting", bg: "#ffeb3b" }, 
             { id: "F", name: "Only Stunting", bg: "#00bcd4" }, 
             { id: "G", name: "Only Underweight", bg: "#03a9f4" }, 
@@ -148125,11 +148125,12 @@
             let count = counts[cat.id]; 
             totalAtoJ += count; 
             let perc = validTotal > 0 ? ((count / validTotal) * 100).toFixed(1) : "0.0"; 
+            
             html += `<tr>
                 <td style="text-align:center; font-weight:bold;">${cat.id}</td>
                 <td style="text-align:left;">${cat.name}</td>
                 <td style="text-align:center;"><a class="dl-link" onclick="downloadSpecificCSV('${cat.id}')" title="Download ${cat.name} list">${count}</a></td>
-                <td style="text-align:center;">${perc}%</td>
+                <td style="text-align:center; background-color:${cat.bg}; color:white; font-weight:bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.7); border: 1px solid #ccc;">${perc}%</td>
             </tr>`; 
             if (count > 0) { chartData.push(count); chartColors.push(cat.bg); chartLabels.push(`${cat.name} (${perc}%)`); } 
         });
@@ -148152,13 +148153,13 @@
             options: { 
                 responsive: true, 
                 maintainAspectRatio: false, 
-                layout: { padding: { bottom: 40 } }, 
-                plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 12, boxHeight: 12, font: { size: 12, weight: 'bold' }, padding: 20 } } } 
+                layout: { padding: { bottom: 30 } }, 
+                plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 12, boxHeight: 12, font: { size: 12, weight: 'bold' }, padding: 15 } } } 
             } 
         });
     }
 
-    // Specific Download Engine for filtered clicks (Now handles A-J)
+    // Specific Download Engine for filtered clicks
     function downloadSpecificCSV(categoryType) {
         let csv = [];
         globalData.forEach(r => {
