@@ -35,7 +35,7 @@
         /* Scrollable Data Area */
         .table-scroll-container { flex: 1 1 auto; overflow-y: auto; border: 1px solid #ccc; background: white; margin-bottom: 10px; min-height: 0;}
 
-        /* FAST Table Design */
+        /* FAST Table Design - Fixed layout & content visibility prevents browser lag on 10k rows */
         table { border-collapse: collapse; width: 100%; table-layout: fixed; background: white;}
         th, td { border: 1px solid #ccc; padding: 5px; text-align: center; font-size: 11px; word-wrap: break-word; overflow: hidden; }
         #spreadsheet tbody tr { content-visibility: auto; contain-intrinsic-size: 32px; }
@@ -49,9 +49,20 @@
         #spreadsheet tbody tr:nth-child(odd) { background-color: #ffffff; }
         
         input, select { width: 95%; box-sizing: border-box; padding: 4px; border: 1px solid #bbb; font-size: 11px; background-color: rgba(255,255,255,0.8); border-radius: 3px;}
+        input[type="date"] { padding: 4px 1px; font-size: 10.5px; } /* Ensures the year isn't clipped by input padding */
         
-        /* Column Widths optimized for full date visibility */
-        .col-sn { width: 2.5%; } .col-fac { width: 9%; } .col-child { width: 9%; } .col-date { width: 9%; } .col-age { width: 3.5%; } .col-gen { width: 4.5%; } .col-wt { width: 5%; } .col-ht { width: 5%; } .col-z { width: 4%; }  .col-stat { width: 7%; } .col-dbi { width: 9%; }
+        /* Column Widths (Adjusted for full date visibility) */
+        .col-sn { width: 2%; } 
+        .col-fac { width: 9%; } 
+        .col-child { width: 9%; } 
+        .col-date { width: 11.5%; } /* Increased width for full MM/DD/YYYY view */
+        .col-age { width: 3%; } 
+        .col-gen { width: 4%; } 
+        .col-wt { width: 4.5%; } 
+        .col-ht { width: 4.5%; } 
+        .col-z { width: 3.5%; }  
+        .col-stat { width: 6.5%; } 
+        .col-dbi { width: 11%; }
 
         .dbi-cat { font-weight: normal !important; } .status-cell { font-weight: bold; }
 
@@ -148141,8 +148152,8 @@
             options: { 
                 responsive: true, 
                 maintainAspectRatio: false, 
-                layout: { padding: { bottom: 20 } }, 
-                plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 12, boxHeight: 12, font: { size: 12, weight: 'bold' }, padding: 15 } } } 
+                layout: { padding: { bottom: 40 } }, 
+                plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 12, boxHeight: 12, font: { size: 12, weight: 'bold' }, padding: 20 } } } 
             } 
         });
     }
