@@ -92,10 +92,13 @@
         .stat-section { display: flex; flex-direction: row; flex-wrap: wrap; gap: 20px; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .stat-header { width: 100%; font-size: 18px; font-weight: bold; color: #673ab7; border-bottom: 2px solid #ede7f6; padding-bottom: 8px; margin-bottom: 10px; text-transform: uppercase;}
         .stat-chart-container { flex: 1.5; min-width: 400px; height: 350px; position: relative;}
-        .stat-text-container { flex: 1; min-width: 350px; background: #fafafa; border: 1px solid #ddd; border-radius: 5px; padding: 15px; font-family: "Courier New", Courier, monospace; font-size: 13px; white-space: pre-wrap; line-height: 1.4; color: #333; overflow-x: auto;}
+        /* Highly visible, bold text panel */
+        .stat-text-container { flex: 1; min-width: 350px; background: #ffffff; border: 2px solid #bdbdbd; border-radius: 5px; padding: 15px; font-family: "Courier New", Courier, monospace; font-size: 14px; font-weight: 700; white-space: pre-wrap; line-height: 1.5; color: #000000; overflow-x: auto; box-shadow: inset 0 0 5px rgba(0,0,0,0.05);}
         
         .scatter-container { width: 100%; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .scatter-wrapper { position: relative; width: 100%; height: 600px; margin-top: 15px; }
+        .scatter-wrapper { position: relative; width: 100%; height: 650px; margin-top: 15px; }
+        
+        .exclusion-footer { background: #ede7f6; border-left: 5px solid #673ab7; padding: 15px; margin-top: 15px; font-size: 13px; color: #333; line-height: 1.5; font-style: italic; border-radius: 0 4px 4px 0;}
 
         /* Guide Grid Layouts */
         .guide-grid-2, .guide-grid-3 { display: grid; gap: 20px; margin-bottom: 20px; }
@@ -234,8 +237,14 @@
                     <div class="stat-header" style="border: none; padding: 0; margin: 0;">Conceptual Density Plot - Double Burden Index</div>
                     <button class="export-btn" onclick="exportChartAsPNG('scatterChart', 'DBI_Conceptual_Density_Plot.png')" style="background-color: #673ab7;">📥 Download Chart (PNG)</button>
                 </div>
-                <p style="font-size: 13px; color: #444; font-style: italic; margin-top: 0;">This chart maps children to their A-J Classification zones based on the Phadke, Gautam, Nair, and Rade (2026) conceptual framework. Dots are micro-jittered to visually represent population density and intensity within each double-burden category.</p>
+                <p style="font-size: 13px; color: #444; font-style: italic; margin-top: 0;">This chart maps children to their A-J Classification zones based strictly on the intersecting geometric boundaries of the Phadke, Gautam, Nair, and Rade (2026) conceptual framework. Dots are micro-jittered to visually represent population density.</p>
                 <div class="scatter-wrapper"><canvas id="scatterChart"></canvas></div>
+                <div class="exclusion-footer">
+                    <strong>Statistical & Plotting Notes:</strong><br>
+                    • <strong>Exclusion Criteria:</strong> Z-scores falling outside the WHO biological plausibility limits are flagged as "out of range" and strictly excluded from the Gaussian curves and aggregate prevalence percentages. (Limits applied: WAZ < -6 or > 5; HAZ < -6 or > 6; WHZ < -5 or > 5).<br>
+                    • Methodologies align with WHO Anthro standard cleaning criteria and ENA for SMART descriptive epidemiology guidelines.<br>
+                    • The Conceptual Density grid maps Height-for-Age (X-axis) against Weight-for-Age (Y-axis), with defining geometric boundaries for Weight-for-Height (Solid Diagonal) and Weight-for-Height +2SD (Dotted Curve).
+                </div>
             </div>
 
         </div>
@@ -148211,35 +148220,53 @@
             `Prevalence of severe acute malnutrition (<-3 z-score)\n` + formatLine('All', swAll, whM.n, calcPrev(swAll, whM.n)) + formatLine('Boys', swB, whB.n, calcPrev(swB, whB.n)) + formatLine('Girls', swG, whG.n, calcPrev(swG, whG.n)) + `\n` +
             `mean±SD of WHZ (n=${whM.n}): ${whM.mean.toFixed(2)} ± ${whM.sd.toFixed(2)}\n` + `z-scores not available: ${whzData.missing}\n` + `z-scores out of range : ${whzData.flags}`;
 
-        // CONCEPTUAL DENSITY SCATTER PLOT
+        // CONCEPTUAL DENSITY SCATTER PLOT (Precision Geometric Framework)
         let scatterDatasets = {};
         ['A','B','C','D','E','F','G','H','I','J'].forEach(cat => {
-            scatterDatasets[cat] = { label: `Category ${cat}`, data: [], backgroundColor: catColors[cat], pointRadius: 3, hoverRadius: 5 };
+            scatterDatasets[cat] = { label: `Category ${cat}`, data: [], backgroundColor: catColors[cat], pointRadius: 1.5, hoverRadius: 4, borderWidth: 0 };
         });
 
-        // The Conceptual Map Zones (X = HAZ axis, Y = WAZ axis conceptually)
-        const zoneMap = {
-            'A': {x: 4.0, y: 3.0}, 'B': {x: 6.5, y: 3.0}, 'C': {x: 3.0, y: -3.0}, 'D': {x: -1.5, y: -3.0}, 'E': {x: -4.0, y: -3.0},
-            'F': {x: -4.0, y: 3.0}, 'G': {x: 1.5, y: -0.5}, 'H': {x: -1.5, y: 3.0}, 'I': {x: 1.5, y: 3.0}, 'J': {x: -1.5, y: 0.5}
-        };
+        // Mathematical Equations defining the framework boundaries
+        const L1 = (x) => x - 2; // Solid Wt for Ht Line (Crosses below center)
+        const L2 = (x) => x >= 0 ? x : 0.5 * Math.pow(x + 2, 2) - 2; // Dotted Wt for Ht +2SD Curve (Passes 0,0 & Dips to J)
+
+        // Randomized bounded coordinate generator matching the explicit geometry
+        function getBoundedJitter(cat) {
+            for(let attempts=0; attempts<200; attempts++) {
+                let x = -5.5 + Math.random() * 11; // Range -5.5 to 5.5
+                let y = -5.5 + Math.random() * 11; // Range -5.5 to 5.5
+                let valid = false;
+                if (cat === 'A') valid = (y < L2(x) - 0.1 && y > L1(x) + 0.1 && x > 0.1 && y > 0.1);
+                if (cat === 'B') valid = (y < L1(x) - 0.1 && x > 0.1 && y > 0.1);
+                if (cat === 'C') valid = (y < L1(x) - 0.1 && x > 0.1 && y < -0.1);
+                if (cat === 'D') valid = (y < L1(x) - 0.1 && x < -0.1 && y < -0.1);
+                if (cat === 'E') valid = (y > L1(x) + 0.1 && y < L2(x) - 0.1 && x < -0.1 && y < -0.1);
+                if (cat === 'F') valid = (y > L2(x) + 0.1 && x < -0.1 && y > 0.1);
+                if (cat === 'G') valid = (y > L1(x) + 0.1 && x > 0.1 && y < -0.1);
+                if (cat === 'H') valid = (y < L2(x) - 0.1 && x < -0.1 && y > 0.1);
+                if (cat === 'I') valid = (y > L2(x) + 0.1 && x > 0.1 && y > 0.1);
+                if (cat === 'J') valid = (y > L2(x) + 0.1 && x < -0.1 && y < -0.1);
+                if (valid) return {x, y};
+            }
+            const fallback = {'A':{x:2,y:1}, 'B':{x:4,y:1}, 'C':{x:3,y:-2}, 'D':{x:-2,y:-5}, 'E':{x:-3,y:-2}, 'F':{x:-4,y:3}, 'G':{x:1,y:-0.5}, 'H':{x:-1,y:2}, 'I':{x:2,y:4}, 'J':{x:-2,y:-0.5}};
+            return fallback[cat];
+        }
 
         globalData.forEach(r => {
             if(r.calc.dbi.match(/^[A-J] \(/)) {
                 let cat = r.calc.dbi.charAt(0);
-                let base = zoneMap[cat];
-                // Apply a random jitter within a precise bounding box to create the density cloud
-                let jx = base.x + (Math.random() * 1.6 - 0.8);
-                let jy = base.y + (Math.random() * 1.6 - 0.8);
-                scatterDatasets[cat].data.push({ x: jx, y: jy, child: r.child || "Unnamed", id: r.id });
+                let coords = getBoundedJitter(cat);
+                scatterDatasets[cat].data.push({ x: coords.x, y: coords.y, child: r.child || "Unnamed", id: r.id });
             }
         });
 
-        // The Framework Grid Lines
+        // The Exact Framework Visual Grid Lines
+        let curveData = [];
+        for(let x = -5.5; x <= 5.5; x+=0.2) curveData.push({x: x, y: L2(x)});
+
         let frameworkLines = [
-            { type: 'line', label: 'Ht. for Age Axis', data: [{x:-6, y:0}, {x:8, y:0}], borderColor: '#9e9e9e', borderWidth: 2, pointRadius: 0, fill: false },
-            { type: 'line', label: 'Wt. for Age Axis', data: [{x:0, y:-5}, {x:0, y:5}], borderColor: '#9e9e9e', borderWidth: 2, pointRadius: 0, fill: false },
-            { type: 'line', label: 'Wt. for Ht. Diagonal', data: [{x:-5, y:-5}, {x:7, y:7}], borderColor: '#9e9e9e', borderWidth: 2, pointRadius: 0, fill: false },
-            { type: 'line', label: 'Wt. for Ht. +2SD Curve', data: [{x:-6, y:4}, {x:-3, y:1}, {x:-1.5, y:0}, {x:0, y:0.5}, {x:2, y:2}, {x:5, y:5}], tension: 0.4, borderColor: '#9e9e9e', borderWidth: 2, borderDash: [5,5], pointRadius: 0, fill: false }
+            { type: 'line', label: 'Wt. for Ht. Diagonal', data: [{x:-4, y:-6}, {x:7, y:5}], borderColor: '#757575', borderWidth: 2, pointRadius: 0, fill: false },
+            { type: 'line', label: 'Wt. for Ht. +2SD Curve', data: curveData, borderColor: '#757575', borderWidth: 2, borderDash: [5,5], pointRadius: 0, fill: false }
         ];
 
         let finalDatasets = frameworkLines.concat(Object.values(scatterDatasets).filter(d => d.data.length > 0));
@@ -148251,13 +148278,13 @@
             options: {
                 responsive: true, maintainAspectRatio: false,
                 scales: {
-                    x: { display: false, min: -6, max: 8 },
-                    y: { display: false, min: -5, max: 5 }
+                    x: { min: -5.5, max: 5.5, grid: { color: (ctx) => ctx.tick.value === 0 ? '#333' : 'transparent', lineWidth: (ctx) => ctx.tick.value === 0 ? 2 : 0 }, title: { display: true, text: 'Height for Age (HAZ)', font: {size: 14, weight: 'bold'} } },
+                    y: { min: -5.5, max: 5.5, grid: { color: (ctx) => ctx.tick.value === 0 ? '#333' : 'transparent', lineWidth: (ctx) => ctx.tick.value === 0 ? 2 : 0 }, title: { display: true, text: 'Weight for Age (WAZ)', font: {size: 14, weight: 'bold'} } }
                 },
                 plugins: {
                     legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 10 } },
                     tooltip: { callbacks: { label: (ctx) => {
-                        if(ctx.dataset.type === 'line') return false; // Disable tooltip for gridlines
+                        if(ctx.dataset.type === 'line') return false; 
                         return `SN ${ctx.raw.id} (${ctx.raw.child})`; 
                     }}}
                 }
