@@ -5,12 +5,14 @@
     <title>Double Burden Index (DBI) Calculator by Phadke, Gautam, Nair and Rade, 2026</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 10px; background-color: #f8f9fa; 
+        /* Frozen Shell Layout */
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: Arial, sans-serif; background-color: #f8f9fa; 
                -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+        body { display: flex; flex-direction: column; }
         
         /* Sticky Header Group */
-        .sticky-top { position: sticky; top: 0; z-index: 1000; background-color: #f8f9fa; padding-bottom: 5px; }
-        .header-title { background-color: #4285f4; color: white; padding: 12px; text-align: center; font-weight: bold; font-size: 22px; margin-bottom: 0;}
+        .sticky-top { flex: 0 0 auto; padding: 10px 10px 0 10px; background-color: #f8f9fa; z-index: 1000; }
+        .header-title { background-color: #4285f4; color: white; padding: 12px; text-align: center; font-weight: bold; font-size: 22px; margin-bottom: 0; border-radius: 4px;}
         
         /* Dynamic Tabs */
         .tab-container { margin-bottom: 0; margin-top: 8px; display: flex; width: 100%; }
@@ -18,27 +20,20 @@
         .tab-btn:last-child { margin-right: 0; }
         .tab-btn:hover { background-color: #d5d5d5; }
         
-        /* INSTANT TAB SWITCHING LOGIC (No DOM Reflows) */
-        .tab-wrapper { position: relative; width: 100%; }
+        /* INSTANT TAB SWITCHING & SCROLLABLE INSIDES */
+        .tab-wrapper { flex: 1 1 auto; position: relative; margin: 0 10px 10px 10px; }
         .tab-content { 
-            position: absolute; 
-            visibility: hidden; 
-            opacity: 0; 
-            top: 0; left: 0; 
-            width: 100%; 
-            pointer-events: none;
+            position: absolute; inset: 0;
+            visibility: hidden; opacity: 0; pointer-events: none;
             background: #f4f7fe; padding: 15px; border: 2px solid #4285f4; border-top: none; border-radius: 0 0 8px 8px; box-sizing: border-box;
-            transition: opacity 0.1s;
+            overflow-y: auto; transition: opacity 0.1s;
         }
         .tab-content.active { 
-            position: relative; 
-            visibility: visible; 
-            opacity: 1; 
-            pointer-events: auto;
+            visibility: visible; opacity: 1; pointer-events: auto; display: flex; flex-direction: column;
         }
 
         /* Scrollable Data Area */
-        .table-scroll-container { max-height: 60vh; overflow-y: auto; border: 1px solid #ccc; background: white; }
+        .table-scroll-container { flex: 1 1 auto; overflow-y: auto; border: 1px solid #ccc; background: white; margin-bottom: 10px; min-height: 0;}
 
         /* FAST Table Design */
         table { border-collapse: collapse; width: 100%; table-layout: fixed; background: white;}
@@ -55,36 +50,35 @@
         
         input, select { width: 95%; box-sizing: border-box; padding: 4px; border: 1px solid #bbb; font-size: 11px; background-color: rgba(255,255,255,0.8); border-radius: 3px;}
         
-        /* Column Widths strictly enforced for Performance */
+        /* Column Widths */
         .col-sn { width: 3%; } .col-fac { width: 10%; } .col-child { width: 10%; } .col-date { width: 7.5%; } .col-age { width: 4.5%; } .col-gen { width: 4.5%; } .col-wt { width: 5%; } .col-ht { width: 5%; } .col-z { width: 4%; }  .col-stat { width: 7%; } .col-dbi { width: 9%; }
-
         .dbi-cat { font-weight: normal !important; } .status-cell { font-weight: bold; }
 
-        /* Pagination Controls */
-        .pagination-controls { display: flex; justify-content: space-between; align-items: center; background: #e3f2fd; padding: 10px 15px; border: 1px solid #90caf9; border-radius: 4px; margin-top: 10px; }
-        .page-btn { background: #1976d2; color: white; border: none; padding: 6px 15px; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 12px; transition: 0.2s;}
+        /* Compact Pagination Controls */
+        .pagination-controls { flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; background: #e3f2fd; padding: 6px 12px; border: 1px solid #90caf9; border-radius: 4px; margin-bottom: 10px; }
+        .page-btn { background: #1976d2; color: white; border: none; padding: 5px 10px; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 11px; transition: 0.2s;}
         .page-btn:disabled { background: #b0bec5; cursor: not-allowed; }
         .page-btn:hover:not(:disabled) { background: #1565c0; }
 
-        /* Summary Table Alternating Shading */
-        #summaryBody tr:nth-child(even) { background-color: #f2f9f4; }
-        #summaryBody tr:nth-child(odd) { background-color: #ffffff; }
-
         /* Bulk Import */
-        .bulk-import-container { background: #e8f0fe; padding: 10px; margin-top: 15px; border: 1px solid #4285f4; border-radius: 5px; font-size: 12px;}
+        .bulk-import-container { flex: 0 0 auto; background: #e8f0fe; padding: 10px; margin-top: 5px; border: 1px solid #4285f4; border-radius: 5px; font-size: 12px;}
         .bulk-import-container textarea { width: 100%; height: 35px; margin-top: 5px; margin-bottom: 5px; font-size: 11px; padding: 5px;}
 
         /* Summary Grid Layout */
-        .summary-grid { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; align-items: stretch;}
-        .summary-column { display: flex; flex-direction: column; width: 100%; max-width: 600px; justify-content: space-between; }
+        .summary-grid { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; align-items: stretch; height: 100%;}
+        .summary-column { display: flex; flex-direction: column; width: 100%; max-width: 600px; justify-content: flex-start; gap: 15px;}
         .summary-table th, .summary-table td { padding: 8px; font-size: 13px; }
         
-        .chart-container { width: 100%; max-width: 500px; flex-grow: 1; background: white; padding: 15px; border-radius: 8px; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;}
-        .chart-wrapper { position: relative; width: 100%; height: 420px; margin-top: 10px; }
+        .chart-container { width: 100%; max-width: 600px; flex-grow: 1; background: white; padding: 15px; border-radius: 8px; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;}
+        .chart-wrapper { position: relative; width: 100%; flex-grow: 1; min-height: 400px; margin-top: 10px; }
 
         .header-with-btn { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px; }
         .export-btn { background-color: #2e7d32; color: white; border: none; padding: 4px 8px; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 11px; transition: background 0.2s; }
         .export-btn:hover { background-color: #1b5e20; }
+        
+        /* Clickable Download Links in Summary */
+        .dl-link { color: #1976d2; font-weight: bold; text-decoration: underline; cursor: pointer; transition: color 0.2s; }
+        .dl-link:hover { color: #d32f2f; }
 
         /* Guide Grid Layouts */
         .guide-grid-2, .guide-grid-3 { display: grid; gap: 20px; margin-bottom: 20px; }
@@ -115,7 +109,7 @@
     <div class="tab-wrapper">
         <!-- TAB 1: Data Entry -->
         <div id="dataEntry" class="tab-content active" style="border-color: #4285f4; background-color: #f4f7fe;">
-            <div style="display: flex; justify-content: flex-end; margin-bottom: 5px;">
+            <div style="flex: 0 0 auto; display: flex; justify-content: flex-end; margin-bottom: 5px;">
                 <button class="export-btn" onclick="exportCalculatedDataToCSV()" title="Download Entered Data & Results">📥 Export Data (CSV)</button>
             </div>
 
@@ -151,14 +145,14 @@
                 </table>
             </div>
 
-            <!-- Virtual Memory Pagination Controls -->
+            <!-- Compact Virtual Memory Pagination Controls -->
             <div class="pagination-controls">
-                <button id="btnPrev" class="page-btn" onclick="prevPage()">◀ Previous 100 Rows</button>
-                <span id="pageInfo" style="font-weight: bold; font-size: 13px; color: #1976d2;">Page 1 of 1</span>
-                <button id="btnNext" class="page-btn" onclick="nextPage()">Next 100 Rows ▶</button>
+                <button id="btnPrev" class="page-btn" onclick="prevPage()">◀ Prev 500</button>
+                <span id="pageInfo" style="font-weight: bold; font-size: 12px; color: #1976d2;">Page 1 of 1</span>
+                <button id="btnNext" class="page-btn" onclick="nextPage()">Next 500 ▶</button>
             </div>
             
-            <button onclick="addRow()" style="margin-top: 12px; padding: 8px 12px; background-color: #4285f4; color: white; border: none; cursor:pointer; font-weight:bold; border-radius: 4px; font-size: 12px;">+ Add Single Row</button>
+            <button onclick="addRow()" style="flex: 0 0 auto; padding: 8px 12px; background-color: #4285f4; color: white; border: none; cursor:pointer; font-weight:bold; border-radius: 4px; font-size: 12px; align-self: flex-start;">+ Add Single Row</button>
 
             <div class="bulk-import-container">
                 <strong>Bulk Excel Import (Up to 10,000 children):</strong> Copy rows from Excel (Doctor, Child Name, Survey Date, Birth Date, Gender, Weight, Height) and paste them below.
@@ -195,6 +189,7 @@
                                 <!-- Injected via JS -->
                             </tbody>
                         </table>
+                        <p style="font-size: 11px; color: #555; font-style: italic; margin-top: 5px;">* Click on the blue numbers above to directly download the filtered list of those specific children.</p>
                     </div>
                 </div>
 
@@ -147799,7 +147794,7 @@
     // --- VIRTUAL MEMORY STATE --- //
     let globalData = [];
     let currentPage = 1;
-    const rowsPerPage = 100;
+    const rowsPerPage = 500;
 
     window.onload = () => { 
         for(let i=1; i<=10; i++) {
@@ -147851,8 +147846,8 @@
         document.getElementById('btnNext').disabled = currentPage === totalPages;
     }
 
-    function prevPage() { if(currentPage > 1) { currentPage--; renderTable(); } }
-    function nextPage() { let totalPages = Math.ceil(globalData.length / rowsPerPage); if(currentPage < totalPages) { currentPage++; renderTable(); } }
+    function prevPage() { if(currentPage > 1) { currentPage--; renderTable(); document.querySelector('.table-scroll-container').scrollTop = 0; } }
+    function nextPage() { let totalPages = Math.ceil(globalData.length / rowsPerPage); if(currentPage < totalPages) { currentPage++; renderTable(); document.querySelector('.table-scroll-container').scrollTop = 0; } }
 
     function formatExcelDate(dateStr) { 
         if(!dateStr) return ""; 
@@ -147882,20 +147877,30 @@
     function calculateLogic(fac, child, sDate, bDate, gender, w, h) {
         let out = { ageDays: -1, ageM: "", wazZ: "", wazS: "", hazZ: "", hazS: "", whzZ: "", whzS: "", dbi: "", dbiBg: "transparent", dbiColor: "black", facBg: "", childBg: "" };
         
+        // Blank row check
         if (!fac && !child && !sDate && !bDate && !gender && isNaN(w) && isNaN(h)) return out;
 
+        // Mandatory Field Validation
         if (!fac || !child) {
-            out.dbi = "Missing Name/Facility"; out.dbiBg = "#ffcdd2"; out.dbiColor = "black";
-            out.facBg = !fac ? "#ffcdd2" : ""; out.childBg = !child ? "#ffcdd2" : ""; return out;
+            out.dbi = "Missing Name/Facility";
+            out.dbiBg = "#ffcdd2"; // Pink warning color
+            out.dbiColor = "black";
+            out.facBg = !fac ? "#ffcdd2" : "";
+            out.childBg = !child ? "#ffcdd2" : "";
+            return out;
         }
 
-        if (!sDate || !bDate || !gender || isNaN(w) || isNaN(h)) { out.dbi = "Missing Data"; return out; }
+        if (!sDate || !bDate || !gender || isNaN(w) || isNaN(h)) {
+             out.dbi = "Missing Data"; 
+             return out;
+        }
         
         let sDateObj = new Date(sDate), todayObj = new Date(); todayObj.setHours(0,0,0,0);
         if (sDateObj > todayObj || sDateObj < new Date(bDate)) { out.dbi = "Date Error"; out.dbiBg = "#ffeb3b"; return out; }
         
         let ageDays = Math.floor((sDateObj - new Date(bDate)) / 86400000); 
-        out.ageDays = ageDays; out.ageM = Math.round(ageDays / 30.4375);
+        out.ageDays = ageDays; 
+        out.ageM = Math.round(ageDays / 30.4375);
         
         if (ageDays > 1856) { out.dbi = "> 5 years"; out.dbiBg = "#ffcc80"; return out; }
         if (h < 45) { out.dbi = "Length < 45cm"; out.dbiBg = "#e0e0e0"; return out; }
@@ -147967,6 +147972,9 @@
         globalData.push(createEmptyRow(newId));
         currentPage = Math.ceil(globalData.length / rowsPerPage);
         renderTable();
+        // Auto scroll to bottom
+        let scrollCont = document.querySelector('.table-scroll-container');
+        setTimeout(() => scrollCont.scrollTop = scrollCont.scrollHeight, 50);
     }
 
     // Fast memory push during bulk paste
@@ -148045,16 +148053,8 @@
             if(!r.fac && !r.child && !r.sDate && !r.bDate && !r.gender && r.wt==="" && r.ht==="") return;
             if (!val) return;
             
-            if(val.startsWith("A (")) { counts.A++; validTotal++; grandTotal++; } 
-            else if(val.startsWith("B (")) { counts.B++; validTotal++; grandTotal++; } 
-            else if(val.startsWith("C (")) { counts.C++; validTotal++; grandTotal++; } 
-            else if(val.startsWith("D (")) { counts.D++; validTotal++; grandTotal++; } 
-            else if(val.startsWith("E (")) { counts.E++; validTotal++; grandTotal++; } 
-            else if(val.startsWith("F (")) { counts.F++; validTotal++; grandTotal++; } 
-            else if(val.startsWith("G (")) { counts.G++; validTotal++; grandTotal++; } 
-            else if(val.startsWith("H (")) { counts.H++; validTotal++; grandTotal++; } 
-            else if(val.startsWith("I (")) { counts.I++; validTotal++; grandTotal++; } 
-            else if(val.startsWith("J (")) { counts.J++; validTotal++; grandTotal++; } 
+            let firstChar = val.charAt(0);
+            if(['A','B','C','D','E','F','G','H','I','J'].includes(firstChar)) { counts[firstChar]++; validTotal++; grandTotal++; } 
             else if(val.includes("> 5 years")) { counts.Over5++; grandTotal++; } 
             else if(val.includes("Implausible")) { counts.Implausible++; grandTotal++; } 
             else if(val.includes("Missing")) { counts.Missing++; grandTotal++; } 
@@ -148084,14 +148084,67 @@
         });
 
         document.getElementById('summaryBody').innerHTML = html + `<tr style="background:#e8f5e9; color:black; font-weight:bold"><td colspan="2" style="text-align:right;">Total (A to J)</td><td style="text-align:center;">${totalAtoJ}</td><td style="text-align:center;">${validTotal>0?((totalAtoJ/validTotal)*100).toFixed(1):"0.0"}%</td></tr>`;
-        document.getElementById('secondarySummaryBody').innerHTML = `<tr><td style="font-weight:bold; text-align: left;">DBI Classified</td><td style="text-align:center;">${validTotal}</td></tr><tr><td style="font-weight:bold; text-align: left;">Children age > 5 years</td><td style="text-align:center;">${counts.Over5}</td></tr><tr><td style="font-weight:bold; text-align: left;">Implausible data</td><td style="text-align:center;">${counts.Implausible}</td></tr><tr><td style="font-weight:bold; text-align: left;">Missing Information</td><td style="text-align:center;">${counts.Missing}</td></tr><tr><td style="font-weight:bold; text-align: left;">Data entry error</td><td style="text-align:center;">${counts.Error}</td></tr><tr style="background:#2e7d32; color:white; font-weight:bold"><td style="text-align: left;">Total Rows Evaluated</td><td style="text-align:center;">${grandTotal}</td></tr>`;
+        
+        // Link to specific filter downloads
+        document.getElementById('secondarySummaryBody').innerHTML = `
+            <tr><td style="font-weight:bold; text-align: left;">DBI Classified</td><td style="text-align:center;"><a class="dl-link" onclick="downloadSpecificCSV('classified')" title="Click to download this list">${validTotal}</a></td></tr>
+            <tr><td style="font-weight:bold; text-align: left;">Children age > 5 years</td><td style="text-align:center;"><a class="dl-link" onclick="downloadSpecificCSV('over5')" title="Click to download this list">${counts.Over5}</a></td></tr>
+            <tr><td style="font-weight:bold; text-align: left;">Implausible data</td><td style="text-align:center;"><a class="dl-link" onclick="downloadSpecificCSV('implausible')" title="Click to download this list">${counts.Implausible}</a></td></tr>
+            <tr><td style="font-weight:bold; text-align: left;">Missing Information</td><td style="text-align:center;"><a class="dl-link" onclick="downloadSpecificCSV('missing')" title="Click to download this list">${counts.Missing}</a></td></tr>
+            <tr><td style="font-weight:bold; text-align: left;">Data entry error</td><td style="text-align:center;"><a class="dl-link" onclick="downloadSpecificCSV('error')" title="Click to download this list">${counts.Error}</a></td></tr>
+            <tr style="background:#2e7d32; color:white; font-weight:bold"><td style="text-align: left;">Total Rows Evaluated</td><td style="text-align:center;">${grandTotal}</td></tr>`;
         
         if (chartInstance) chartInstance.destroy();
         chartInstance = new Chart(document.getElementById('dbiChart').getContext('2d'), { 
             type: 'doughnut', 
             data: { labels: chartLabels, datasets: [{ data: chartData, backgroundColor: chartColors, hoverOffset: 12 }] }, 
-            options: { responsive: true, maintainAspectRatio: false, layout: { padding: 0 }, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 }, padding: 15 } } } } 
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                layout: { padding: { bottom: 40 } }, 
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 12 }, padding: 20 } } } 
+            } 
         });
+    }
+
+    // Specific Download Engine for filtered clicks
+    function downloadSpecificCSV(categoryType) {
+        let csv = [];
+        globalData.forEach(r => {
+            let val = r.calc.dbi.trim();
+            if(!r.fac && !r.child && !r.sDate && !r.bDate && !r.gender && r.wt==="" && r.ht==="") return;
+            if (!val) return;
+
+            let match = false;
+            let firstChar = val.charAt(0);
+            let isClassified = ['A','B','C','D','E','F','G','H','I','J'].includes(firstChar);
+
+            if (categoryType === 'classified' && isClassified) match = true;
+            else if (categoryType === 'over5' && val.includes("> 5 years")) match = true;
+            else if (categoryType === 'implausible' && val.includes("Implausible")) match = true;
+            else if (categoryType === 'missing' && val.includes("Missing")) match = true;
+            else if (categoryType === 'error' && !isClassified && !val.includes("> 5 years") && !val.includes("Implausible") && !val.includes("Missing")) match = true;
+
+            if (match) {
+                let c = r.calc;
+                csv.push(`"${r.id}","${r.fac}","${r.child}","${r.sDate}","${r.bDate}","${c.ageM}","${r.gender}","${r.wt}","${r.ht}","${c.wazZ}","${c.wazS}","${c.hazZ}","${c.hazS}","${c.whzZ}","${c.whzS}","${c.dbi}"`);
+            }
+        });
+
+        if (csv.length === 0) {
+            alert("No data available in this specific category to download.");
+            return;
+        }
+        
+        let header = '"SN","Facility","Child Name","Survey Date","Birth Date","Age (Months)","Gender","Weight","Height","WAZ Z","WAZ Status","HAZ Z","HAZ Status","WHZ Z","WHZ Status","DBI Category"';
+        let csvFile = new Blob([[header, ...csv].join("\n")], { type: "text/csv" }); 
+        let downloadLink = document.createElement("a"); 
+        downloadLink.download = `DBI_Filtered_${categoryType.toUpperCase()}_Data.csv`; 
+        downloadLink.href = window.URL.createObjectURL(csvFile); 
+        downloadLink.style.display = "none"; 
+        document.body.appendChild(downloadLink); 
+        downloadLink.click(); 
+        document.body.removeChild(downloadLink);
     }
 
     function exportTableToCSV() {
