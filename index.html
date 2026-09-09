@@ -82,20 +82,31 @@
         .dl-link:hover { color: #d32f2f; }
 
         /* --- POPULATION STATS & CURVES CSS --- */
-        .exclusion-toggle-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .toggle-options { display: flex; gap: 20px; align-items: center; font-size: 15px; color: #333; }
+        .exclusion-toggle-bar { display: flex; flex-direction: row; align-items: center; background: white; padding: 8px 15px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .toggle-options { display: flex; gap: 20px; align-items: center; font-size: 14px; color: #673ab7; font-weight: bold; margin-right: auto;}
         .toggle-options label { cursor: pointer; display: flex; align-items: center; gap: 5px; }
-        .toggle-options input[type="radio"] { transform: scale(1.3); cursor: pointer; }
+        .toggle-options input[type="radio"] { transform: scale(1.2); cursor: pointer; }
 
         /* PERFECT VERTICAL ALIGNMENT LAYOUT */
-        .stat-section { display: flex; flex-direction: row; align-items: stretch; height: 420px; gap: 20px; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .stat-chart-container { flex: 1.5; position: relative; height: 100%; min-width: 0; }
-        .stat-text-container { flex: 1; height: 100%; overflow-y: auto; display: flex; flex-direction: column; justify-content: center; background: #ffffff; border: 2px solid #bdbdbd; border-radius: 5px; padding: 15px; font-family: "Courier New", Courier, monospace; font-size: 14px; font-weight: 700; white-space: pre-wrap; line-height: 1.5; color: #000000; box-shadow: inset 0 0 5px rgba(0,0,0,0.05);}
+        .stat-section { display: flex; flex-direction: row; height: 380px; gap: 20px; align-items: stretch; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .stat-chart-container { width: 55%; position: relative; height: 100%; }
+        .stat-text-container { width: 45%; height: 100%; overflow-y: auto; display: flex; flex-direction: column; justify-content: flex-start; background: #ffffff; border: 1px solid #bdbdbd; border-radius: 5px; padding: 15px; font-family: "Courier New", Courier, monospace; font-size: 13.5px; font-weight: 700; white-space: pre-wrap; line-height: 1.5; color: #000000; box-shadow: inset 0 0 5px rgba(0,0,0,0.05);}
         
         /* DBI FRAMEWORK CONTAINER */
         .scatter-container { width: 100%; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .scatter-wrapper { position: relative; width: 100%; height: 700px; margin-top: 15px; }
+        .scatter-wrapper { position: relative; width: 100%; height: 750px; margin-top: 25px; }
         
+        /* Floating Green Labels for Framework */
+        .fw-label { position: absolute; background: #00b050; color: white; font-weight: bold; padding: 4px 10px; font-size: 13px; z-index: 10; border: 1px solid white;}
+        .fw-top { top: 0; left: 50%; transform: translateX(-50%); }
+        .fw-bottom { bottom: 0; left: 50%; transform: translateX(-50%); }
+        .fw-left { left: 0; top: 50%; transform: translateY(-50%); }
+        .fw-right { right: 0; top: 50%; transform: translateY(-50%); }
+        .fw-diag-tr { top: 15%; right: 0; }
+        .fw-diag-bl { bottom: 8%; left: 10%; }
+        .fw-curve-tl { top: 15%; left: 10%; }
+        .fw-curve-tr { top: 15%; right: 25%; }
+
         .exclusion-footer { background: #ede7f6; border-left: 5px solid #673ab7; padding: 15px; margin-top: 15px; font-size: 13px; color: #333; line-height: 1.5; font-style: italic; border-radius: 0 4px 4px 0;}
 
         /* Guide Grid */
@@ -205,30 +216,30 @@
         <div id="stats" class="tab-content" style="border-color: #673ab7; background-color: #ede7f6;">
             
             <div class="exclusion-toggle-bar">
+                <strong style="color: #673ab7; margin-right: 15px;">Analysis Data Mode:</strong>
                 <div class="toggle-options">
-                    <strong style="color: #673ab7;">Analysis Data Mode:</strong>
-                    <label><input type="radio" name="exclToggle" id="toggleTotal" value="total" checked onchange="generatePopulationStats()"> <strong>Total (No Exclusion)</strong></label>
-                    <label><input type="radio" name="exclToggle" id="toggleExcl" value="exclude" onchange="generatePopulationStats()"> <strong>Excluding WHO Flags</strong></label>
+                    <label><input type="radio" name="exclToggle" id="toggleTotal" value="total" checked onchange="generatePopulationStats()"> <span>Total (No Exclusion)</span></label>
+                    <label><input type="radio" name="exclToggle" id="toggleExcl" value="exclude" onchange="generatePopulationStats()"> <span>Excluding WHO Flags</span></label>
                 </div>
                 <button class="export-btn" style="background-color: #673ab7;" onclick="window.print()">🖨️ Print Statistics Report</button>
             </div>
 
             <!-- Section 1: WAZ -->
-            <div style="width: 100%; font-size: 18px; font-weight: bold; color: #673ab7; border-bottom: 2px solid #ccc; padding-bottom: 8px; margin-bottom: 10px; text-transform: uppercase;">Section 1: Underweight (Weight-for-Age Z-scores)</div>
+            <div style="width: 100%; font-size: 18px; font-weight: bold; color: #673ab7; border-bottom: 2px solid #ccc; padding-bottom: 8px; margin-bottom: 10px; text-transform: uppercase;">SECTION 1: WEIGHT-FOR-AGE Z-SCORE (WAZ)</div>
             <div class="stat-section">
                 <div class="stat-chart-container"><canvas id="wazChart"></canvas></div>
                 <div class="stat-text-container" id="wazStatsText">Loading statistics...</div>
             </div>
 
             <!-- Section 2: HAZ -->
-            <div style="width: 100%; font-size: 18px; font-weight: bold; color: #673ab7; border-bottom: 2px solid #ccc; padding-bottom: 8px; margin-bottom: 10px; text-transform: uppercase;">Section 2: Stunting (Height-for-Age Z-scores)</div>
+            <div style="width: 100%; font-size: 18px; font-weight: bold; color: #673ab7; border-bottom: 2px solid #ccc; padding-bottom: 8px; margin-bottom: 10px; text-transform: uppercase;">SECTION 2: HEIGHT-FOR-AGE Z-SCORE (HAZ)</div>
             <div class="stat-section">
                 <div class="stat-chart-container"><canvas id="hazChart"></canvas></div>
                 <div class="stat-text-container" id="hazStatsText">Loading statistics...</div>
             </div>
 
             <!-- Section 3: WHZ -->
-            <div style="width: 100%; font-size: 18px; font-weight: bold; color: #673ab7; border-bottom: 2px solid #ccc; padding-bottom: 8px; margin-bottom: 10px; text-transform: uppercase;">Section 3: Wasting / Overweight (Weight-for-Height Z-scores)</div>
+            <div style="width: 100%; font-size: 18px; font-weight: bold; color: #673ab7; border-bottom: 2px solid #ccc; padding-bottom: 8px; margin-bottom: 10px; text-transform: uppercase;">SECTION 3: WEIGHT-FOR-HEIGHT Z-SCORE (WHZ)</div>
             <div class="stat-section">
                 <div class="stat-chart-container"><canvas id="whzChart"></canvas></div>
                 <div class="stat-text-container" id="whzStatsText">Loading statistics...</div>
@@ -237,12 +248,22 @@
             <!-- Section 4: DBI Scatter Plot -->
             <div class="scatter-container">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ede7f6; padding-bottom: 8px; margin-bottom: 10px;">
-                    <div style="font-size: 18px; font-weight: bold; color: #673ab7; text-transform: uppercase;">Conceptual Density Plot - Double Burden Index</div>
+                    <div style="font-size: 18px; font-weight: bold; color: #673ab7; text-transform: uppercase;">CONCEPTUAL DENSITY PLOT - DOUBLE BURDEN INDEX</div>
                     <button class="export-btn" onclick="exportChartAsPNG('scatterChart', 'DBI_Conceptual_Density_Plot.png')" style="background-color: #673ab7;">📥 Download Chart (PNG)</button>
                 </div>
                 <p style="font-size: 13px; color: #444; font-style: italic; margin-top: 0;">This chart maps children to their A-J Classification zones based strictly on the intersecting geometric boundaries of the conceptual framework. Dots are micro-jittered to visually represent population density.</p>
                 
                 <div class="scatter-wrapper">
+                    <!-- Overlay Conceptual Labels matching framework image -->
+                    <div class="fw-label fw-top">Wt. for Age +</div>
+                    <div class="fw-label fw-bottom">Wt. for Age -</div>
+                    <div class="fw-label fw-left">Ht. for Age -</div>
+                    <div class="fw-label fw-right">Ht. for Age +</div>
+                    <div class="fw-label fw-diag-tr">Wt. for Ht.</div>
+                    <div class="fw-label fw-diag-bl">Wt. for Ht.</div>
+                    <div class="fw-label fw-curve-tl">Wt. for Ht. +2SD</div>
+                    <div class="fw-label fw-curve-tr">Wt. for Ht. +2SD</div>
+
                     <canvas id="scatterChart"></canvas>
                 </div>
 
@@ -148120,7 +148141,7 @@
             let isFlagged = (val < limitLower || val > limitUpper);
             if (isFlagged) {
                 flags++;
-                if (excludeFlags) return; // Drop from calculations if toggle is on
+                if (excludeFlags) return; 
             }
             
             all.push(val);
@@ -148157,30 +148178,48 @@
         return points;
     }
 
-    function drawBellChart(canvasId, chartInst, dataMetrics, title) {
+    function drawBellChart(canvasId, chartInst, dataMetrics, excludeFlags) {
         if(chartInst) chartInst.destroy();
-        let whoCurve = buildGaussianCurve(0, 1);
-        let sampleCurve = buildGaussianCurve(dataMetrics.mean, dataMetrics.sd);
+        
+        let minX = -5, maxX = 5;
+        if (!excludeFlags && dataMetrics.all.length > 0) {
+            let dMin = Math.min(...dataMetrics.all);
+            let dMax = Math.max(...dataMetrics.all);
+            minX = Math.floor(Math.min(-5, dMin));
+            maxX = Math.ceil(Math.max(5, dMax));
+        }
+
+        let whoCurve = buildGaussianCurve(0, 1, 0.1, minX, maxX);
+        let sampleCurve = buildGaussianCurve(dataMetrics.mean, dataMetrics.sd, 0.1, minX, maxX);
 
         return new Chart(document.getElementById(canvasId).getContext('2d'), {
             type: 'line',
             data: {
                 datasets: [
-                    { label: 'WHO standards', data: whoCurve, borderColor: '#4caf50', borderWidth: 3, fill: false, pointRadius: 0, tension: 0.4 },
-                    { label: 'Sample Population', data: sampleCurve, borderColor: '#f44336', borderWidth: 3, fill: false, pointRadius: 0, tension: 0.4 }
+                    { label: 'WHO standards', data: whoCurve, borderColor: '#4caf50', borderWidth: 2, pointStyle: 'line', fill: false, tension: 0.4 },
+                    { label: 'Sample Population', data: sampleCurve, borderColor: '#f44336', borderWidth: 2, pointStyle: 'line', fill: false, tension: 0.4 }
                 ]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
-                scales: { x: { type: 'linear', min: -5, max: 5, title: { display: true, text: 'Z-score' } }, y: { title: { display: true, text: 'Density' } } },
-                plugins: { title: { display: false }, legend: { position: 'top' } }
+                scales: { 
+                    x: { type: 'linear', min: minX, max: maxX, title: { display: true, text: 'Z-score' } }, 
+                    y: { title: { display: true, text: 'Density' } } 
+                },
+                plugins: { 
+                    title: { display: false }, 
+                    legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 20 } } 
+                }
             }
         });
     }
 
     function formatLine(label, count, n, metrics) {
-        let l = label.padEnd(8, ' '); let cText = `(${count})`.padStart(6, ' '); let nText = `(n=${n})`.padEnd(8, ' '); let perc = metrics.str.padStart(6, ' ');
-        return `${l} ${nText}: ${cText}  ${perc}  (${metrics.ci} 95% CI)\n`;
+        let l = label.padEnd(8, ' '); 
+        let nText = `(n=${n}):`.padEnd(11, ' '); 
+        let cText = `(${count})`.padEnd(8, ' '); 
+        let perc = metrics.str.padEnd(7, ' ');
+        return `${l} ${nText} ${cText} ${perc} (${metrics.ci} 95% CI)\n`;
     }
 
     function generatePopulationStats() {
@@ -148189,7 +148228,7 @@
         // WAZ (Underweight)
         let wazData = getStatsArr('rawWaz', excludeFlags);
         let wM = calcMetrics(wazData.all), wB = calcMetrics(wazData.boys), wG = calcMetrics(wazData.girls);
-        wazChartInst = drawBellChart('wazChart', wazChartInst, wM, 'Weight-for-Age z-scores');
+        wazChartInst = drawBellChart('wazChart', wazChartInst, wM, excludeFlags);
 
         let uAll = wazData.all.filter(v => v < -2).length, uB = wazData.boys.filter(v => v < -2).length, uG = wazData.girls.filter(v => v < -2).length;
         let suAll = wazData.all.filter(v => v < -3).length, suB = wazData.boys.filter(v => v < -3).length, suG = wazData.girls.filter(v => v < -3).length;
@@ -148205,7 +148244,7 @@
         // HAZ (Stunting)
         let hazData = getStatsArr('rawHaz', excludeFlags);
         let hM = calcMetrics(hazData.all), hB = calcMetrics(hazData.boys), hG = calcMetrics(hazData.girls);
-        hazChartInst = drawBellChart('hazChart', hazChartInst, hM, 'Height-for-Age z-scores');
+        hazChartInst = drawBellChart('hazChart', hazChartInst, hM, excludeFlags);
 
         let sAll = hazData.all.filter(v => v < -2).length, sB = hazData.boys.filter(v => v < -2).length, sG = hazData.girls.filter(v => v < -2).length;
         let ssAll = hazData.all.filter(v => v < -3).length, ssB = hazData.boys.filter(v => v < -3).length, ssG = hazData.girls.filter(v => v < -3).length;
@@ -148221,7 +148260,7 @@
         // WHZ (Wasting)
         let whzData = getStatsArr('rawWhz', excludeFlags);
         let whM = calcMetrics(whzData.all), whB = calcMetrics(whzData.boys), whG = calcMetrics(whzData.girls);
-        whzChartInst = drawBellChart('whzChart', whzChartInst, whM, 'Weight-for-Height z-scores');
+        whzChartInst = drawBellChart('whzChart', whzChartInst, whM, excludeFlags);
 
         let waAll = whzData.all.filter(v => v < -2).length, waB = whzData.boys.filter(v => v < -2).length, waG = whzData.girls.filter(v => v < -2).length;
         let swAll = whzData.all.filter(v => v < -3).length, swB = whzData.boys.filter(v => v < -3).length, swG = whzData.girls.filter(v => v < -3).length;
@@ -148264,10 +148303,19 @@
             return fb[cat];
         }
 
+        let scMaxX = 6, scMinX = -6, scMaxY = 6, scMinY = -6;
+
         globalData.forEach(r => {
             if(r.calc.dbi.match(/^[A-J] \(/)) {
                 let isFlagged = (r.calc.rawWaz < -6 || r.calc.rawWaz > 5 || r.calc.rawHaz < -6 || r.calc.rawHaz > 6 || r.calc.rawWhz < -5 || r.calc.rawWhz > 5);
-                if (excludeFlags && isFlagged) return; // WHO exclusion applied to Scatter Plot
+                if (excludeFlags && isFlagged) return; 
+
+                if (!excludeFlags) {
+                    scMinX = Math.min(scMinX, Math.floor(r.calc.rawHaz));
+                    scMaxX = Math.max(scMaxX, Math.ceil(r.calc.rawHaz));
+                    scMinY = Math.min(scMinY, Math.floor(r.calc.rawWaz));
+                    scMaxY = Math.max(scMaxY, Math.ceil(r.calc.rawWaz));
+                }
 
                 let cat = r.calc.dbi.charAt(0);
                 let coords = getBoundedJitter(cat);
@@ -148276,12 +148324,12 @@
         });
 
         let curveData = [];
-        for(let x = -5.5; x <= 5.5; x+=0.2) curveData.push({x: x, y: L2(x)});
+        for(let x = scMinX; x <= scMaxX; x+=0.2) curveData.push({x: x, y: L2(x)});
 
         let frameworkLines = [
-            { type: 'line', label: 'Ht. for Age Axis', data: [{x:-6, y:0}, {x:6, y:0}], borderColor: '#333333', borderWidth: 2, pointStyle: 'line', fill: false },
-            { type: 'line', label: 'Wt. for Age Axis', data: [{x:0, y:-6}, {x:0, y:6}], borderColor: '#333333', borderWidth: 2, pointStyle: 'line', fill: false },
-            { type: 'line', label: 'Wt. for Ht. Diagonal', data: [{x:-4, y:-6}, {x:7, y:5}], borderColor: '#757575', borderWidth: 2, pointStyle: 'line', fill: false },
+            { type: 'line', label: 'Ht. for Age Axis', data: [{x:-15, y:0}, {x:15, y:0}], borderColor: '#333333', borderWidth: 2, pointStyle: 'line', fill: false },
+            { type: 'line', label: 'Wt. for Age Axis', data: [{x:0, y:-15}, {x:0, y:15}], borderColor: '#333333', borderWidth: 2, pointStyle: 'line', fill: false },
+            { type: 'line', label: 'Wt. for Ht. Diagonal', data: [{x:-10, y:-12}, {x:10, y:8}], borderColor: '#757575', borderWidth: 2, pointStyle: 'line', fill: false },
             { type: 'line', label: 'Wt. for Ht. +2SD Curve', data: curveData, borderColor: '#757575', borderWidth: 2, borderDash: [5,5], pointStyle: 'line', fill: false }
         ];
 
@@ -148294,11 +148342,11 @@
             options: {
                 responsive: true, maintainAspectRatio: false,
                 scales: {
-                    x: { min: -5.5, max: 5.5, title: { display: true, text: 'Height for Age (HAZ)', font: {size: 14, weight: 'bold'} } },
-                    y: { min: -5.5, max: 5.5, title: { display: true, text: 'Weight for Age (WAZ)', font: {size: 14, weight: 'bold'} } }
+                    x: { min: scMinX, max: scMaxX, title: { display: true, text: 'Height for Age (HAZ)', font: {size: 14, weight: 'bold'} } },
+                    y: { min: scMinY, max: scMaxY, title: { display: true, text: 'Weight for Age (WAZ)', font: {size: 14, weight: 'bold'} } }
                 },
                 plugins: {
-                    legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 10, color: '#333' }, display: true },
+                    legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 15, color: '#333' }, display: true },
                     tooltip: { callbacks: { label: (ctx) => {
                         if(ctx.dataset.type === 'line') return false; 
                         return `SN ${ctx.raw.id} (${ctx.raw.child})`; 
