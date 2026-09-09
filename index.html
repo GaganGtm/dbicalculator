@@ -35,7 +35,7 @@
         /* Scrollable Data Area */
         .table-scroll-container { flex: 1 1 auto; overflow-y: auto; border: 1px solid #ccc; background: white; margin-bottom: 10px; min-height: 0;}
 
-        /* FAST Table Design - Fixed layout & content visibility prevents browser lag on 10k rows */
+        /* FAST Table Design */
         table { border-collapse: collapse; width: 100%; table-layout: fixed; background: white;}
         th, td { border: 1px solid #ccc; padding: 5px; text-align: center; font-size: 11px; word-wrap: break-word; overflow: hidden; }
         #spreadsheet tbody tr { content-visibility: auto; contain-intrinsic-size: 32px; }
@@ -43,24 +43,26 @@
         /* Sticky Table Headers */
         #spreadsheet thead tr th { position: sticky; top: 0; z-index: 10; background-color: #1976d2; color: white; }
         #spreadsheet thead tr:first-child th { top: 0; }
-        #spreadsheet thead tr:nth-child(2) th { top: 31px; } /* Adjusted for taller top header */
+        #spreadsheet thead tr:nth-child(2) th { top: 31px; } 
 
         #spreadsheet tbody tr:nth-child(even) { background-color: #eaf1fb; } 
         #spreadsheet tbody tr:nth-child(odd) { background-color: #ffffff; }
         
         input, select { width: 95%; box-sizing: border-box; padding: 4px; border: 1px solid #bbb; font-size: 11px; background-color: rgba(255,255,255,0.8); border-radius: 3px;}
         
-        /* Column Widths strictly enforced for Performance */
-        .col-sn { width: 3%; } .col-fac { width: 10%; } .col-child { width: 10%; } .col-date { width: 7.5%; } .col-age { width: 4.5%; } .col-gen { width: 4.5%; } .col-wt { width: 5%; } .col-ht { width: 5%; } .col-z { width: 4%; }  .col-stat { width: 7%; } .col-dbi { width: 9%; }
+        /* Column Widths optimized for full date visibility */
+        .col-sn { width: 2.5%; } .col-fac { width: 9%; } .col-child { width: 9%; } .col-date { width: 9%; } .col-age { width: 3.5%; } .col-gen { width: 4.5%; } .col-wt { width: 5%; } .col-ht { width: 5%; } .col-z { width: 4%; }  .col-stat { width: 7%; } .col-dbi { width: 9%; }
 
         .dbi-cat { font-weight: normal !important; } .status-cell { font-weight: bold; }
 
-        /* Compact Numbered Pagination Controls */
-        .pagination-container { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; background: #e3f2fd; padding: 10px; border: 1px solid #90caf9; border-radius: 4px; margin-bottom: 10px; gap: 8px; }
-        #pageNumbers { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
+        /* Unified Pagination & Add Row Controls */
+        .pagination-container { flex: 0 0 auto; display: flex; flex-direction: row; justify-content: space-between; align-items: center; background: #e3f2fd; padding: 10px 15px; border: 1px solid #90caf9; border-radius: 4px; margin-bottom: 10px; }
+        #pageInfoText { font-weight: bold; font-size: 13px; color: #1976d2; flex: 1; text-align: left; }
+        #pageNumbers { flex: 2; display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
         .page-num-btn { background: white; color: #1976d2; border: 1px solid #90caf9; padding: 4px 10px; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 12px; transition: 0.2s;}
         .page-num-btn:hover { background: #bbdefb; }
         .page-num-btn.active { background: #1976d2; color: white; border-color: #1976d2; cursor: default; }
+        .add-row-btn { flex: 1; text-align: right; }
 
         /* Summary Table Alternating Shading */
         #summaryBody tr:nth-child(even) { background-color: #f2f9f4; }
@@ -71,20 +73,21 @@
         .bulk-import-container textarea { width: 100%; height: 35px; margin-top: 5px; margin-bottom: 5px; font-size: 11px; padding: 5px;}
 
         /* Summary Dashboard Layout */
-        .summary-top-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+        .summary-top-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; align-items: stretch; }
         .summary-column { flex: 1; min-width: 400px; display: flex; flex-direction: column; }
-        .chart-container { flex: 1; min-width: 400px; background: white; padding: 15px; border-radius: 8px; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center; min-height: 400px;}
-        .chart-wrapper { position: relative; width: 100%; flex-grow: 1; margin-top: 10px; }
+        .chart-container { flex: 1; min-width: 400px; background: white; padding: 15px; border-radius: 8px; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: stretch; }
+        .chart-wrapper { position: relative; width: 100%; flex-grow: 1; margin-top: 10px; display: flex; align-items: center; justify-content: center;}
         .summary-bottom-row { width: 100%; }
 
         .summary-table th, .summary-table td { padding: 8px; font-size: 13px; }
+        .summary-table { flex-grow: 1; display: flex; flex-direction: column; background: white; padding: 15px; border-radius: 8px; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
         .header-with-btn { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px; }
         
         .export-btn { background-color: #4caf50; color: white; border: none; padding: 5px 12px; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 12px; transition: background 0.2s; }
         .export-btn:hover { background-color: #388e3c; }
         
         /* Clickable Download Links in Summary */
-        .dl-link { color: #1976d2; font-weight: bold; text-decoration: underline; cursor: pointer; transition: color 0.2s; }
+        .dl-link { color: #1976d2; font-weight: bold; text-decoration: underline; cursor: pointer; transition: color 0.2s; display: block; width: 100%; height: 100%;}
         .dl-link:hover { color: #d32f2f; }
 
         /* Guide Grid Layouts */
@@ -116,15 +119,15 @@
     <div class="tab-wrapper">
         <!-- TAB 1: Data Entry -->
         <div id="dataEntry" class="tab-content active" style="border-color: #4285f4; background-color: #f4f7fe;">
-            
+
             <div class="table-scroll-container">
                 <table id="spreadsheet">
                     <thead>
                         <tr>
                             <th colspan="9" style="background-color: #1976d2; color: white; padding: 8px; font-size: 13px;">
-                                <div style="display: flex; align-items: center;">
-                                    <button class="export-btn" onclick="exportCalculatedDataToCSV()" title="Download Entered Data & Results">📥 Export Data (CSV)</button>
-                                    <span style="flex-grow: 1; text-align: center; margin-right: 120px;">*Data Entry Cells - (Compulsory)*</span>
+                                <div style="display: flex; align-items: center; position: relative;">
+                                    <button class="export-btn" onclick="exportCalculatedDataToCSV()" title="Download Entered Data & Results" style="position: absolute; left: 0;">📥 Export Data (CSV)</button>
+                                    <span style="flex-grow: 1; text-align: center;">*Data Entry Cells - (Compulsory)*</span>
                                 </div>
                             </th>
                             <th colspan="7" style="background-color: #0d47a1; color: white; padding: 8px; font-size: 13px;">*Automatic output for the classification of malnutrition and DBI*</th>
@@ -154,15 +157,16 @@
                 </table>
             </div>
 
-            <!-- Numbered Pagination Controls -->
+            <!-- Unified Pagination & Action Bar -->
             <div class="pagination-container">
+                <div id="pageInfoText">Page 1 of 1</div>
                 <div id="pageNumbers">
                     <!-- Numbers injected by JS -->
                 </div>
-                <span id="pageInfoText"></span>
+                <div class="add-row-btn">
+                    <button onclick="addRow()" style="padding: 6px 12px; background-color: #4285f4; color: white; border: none; cursor:pointer; font-weight:bold; border-radius: 4px; font-size: 12px;">+ Add Single Row</button>
+                </div>
             </div>
-            
-            <button onclick="addRow()" style="flex: 0 0 auto; padding: 8px 12px; background-color: #4285f4; color: white; border: none; cursor:pointer; font-weight:bold; border-radius: 4px; font-size: 12px; align-self: flex-start;">+ Add Single Row</button>
 
             <div class="bulk-import-container">
                 <strong>Bulk Excel Import (Up to 10,000 children):</strong> Paste your data directly from Excel. Ensure your columns are arranged in this exact order:
@@ -190,7 +194,7 @@
                             <h3 style="margin: 0; color: #2e7d32; font-size: 15px;">Classification Table</h3>
                             <button class="export-btn" onclick="exportTableToCSV()" style="background-color: #2e7d32;">📥 Download Table (CSV)</button>
                         </div>
-                        <table style="background: white;" id="exportTable">
+                        <table style="background: white; height: 100%; border-collapse: collapse;" id="exportTable">
                             <thead>
                                 <tr>
                                     <th style="background-color: #2e7d32; color:white;">Category</th>
@@ -223,7 +227,7 @@
                         <!-- Injected via JS -->
                     </tbody>
                 </table>
-                <p style="font-size: 12px; color: #555; font-style: italic; margin-top: 10px;">* Click on the blue numbers in the table above to directly download the filtered CSV list of those specific children.</p>
+                <p style="font-size: 12px; color: #555; font-style: italic; margin-top: 10px;">* Click on the blue numbers in the tables above to directly download the filtered CSV list of those specific children.</p>
             </div>
         </div>
 
@@ -287,7 +291,7 @@
                 <p><strong>DBI Classification Limits:</strong> DBI classification uses a Z‑score less than −2 to classify low weight-for-age as “underweight”, low length/height-for-age as “stunted”, and low weight-for-length as “wasted”. Similarly a Z‑score above +2 is used to classify weight-for-height as “Overweight/Obesity”.</p>
                 <p><strong>LMS Method:</strong> The computation of percentiles and z-scores for all three indicators uses formulae based on the LMS method given by Cole and Green in 1992, matching WHO Anthro software.</p>
                 <p><strong>Underweight-Obesity Anomaly:</strong> Rarely observed clinically, but formally classified within this tool as Category J (Underweight + Stunting + Obese). If flagged, data requires careful re-verification.</p>
-                <p><strong>Age Limit:</strong> Tool will not function for children > 5 years (60 months) per WHO 2006 standards.</p>
+                <p><strong>Age Limit:</strong> Tool will not function for children > 5 years (>59 months) per WHO 2006 standards.</p>
                 <p><strong>Minimum Length:</strong> No classification for length < 45 cm per WHO standards.</p>
             </div>
             
@@ -147864,7 +147868,7 @@
         }
         document.getElementById('tableBody').innerHTML = htmlBuffer;
 
-        // Numbered Pagination UI
+        // Unified Numbered Pagination UI
         let pageHtml = "";
         for(let p = 1; p <= totalPages; p++) {
             if (p === currentPage) {
@@ -148110,13 +148114,18 @@
             let count = counts[cat.id]; 
             totalAtoJ += count; 
             let perc = validTotal > 0 ? ((count / validTotal) * 100).toFixed(1) : "0.0"; 
-            html += `<tr><td style="text-align:center; font-weight:bold;">${cat.id}</td><td style="text-align:left;">${cat.name}</td><td style="text-align:center;">${count}</td><td style="text-align:center;">${perc}%</td></tr>`; 
+            html += `<tr>
+                <td style="text-align:center; font-weight:bold;">${cat.id}</td>
+                <td style="text-align:left;">${cat.name}</td>
+                <td style="text-align:center;"><a class="dl-link" onclick="downloadSpecificCSV('${cat.id}')" title="Download ${cat.name} list">${count}</a></td>
+                <td style="text-align:center;">${perc}%</td>
+            </tr>`; 
             if (count > 0) { chartData.push(count); chartColors.push(cat.bg); chartLabels.push(`${cat.name} (${perc}%)`); } 
         });
 
         document.getElementById('summaryBody').innerHTML = html + `<tr style="background:#e8f5e9; color:black; font-weight:bold"><td colspan="2" style="text-align:right;">Total (A to J)</td><td style="text-align:center;">${totalAtoJ}</td><td style="text-align:center;">${validTotal>0?((totalAtoJ/validTotal)*100).toFixed(1):"0.0"}%</td></tr>`;
         
-        // Link to specific filter downloads
+        // Link to specific filter downloads for the bottom table
         document.getElementById('secondarySummaryBody').innerHTML = `
             <tr><td style="font-weight:bold; padding: 10px; border: 1px solid #ccc; text-align: left;">DBI Classified</td><td style="text-align:center; border: 1px solid #ccc;"><a class="dl-link" onclick="downloadSpecificCSV('classified')" title="Click to download this list">${validTotal}</a></td></tr>
             <tr><td style="font-weight:bold; padding: 10px; border: 1px solid #ccc; text-align: left;">Children age > 5 years</td><td style="text-align:center; border: 1px solid #ccc;"><a class="dl-link" onclick="downloadSpecificCSV('over5')" title="Click to download this list">${counts.Over5}</a></td></tr>
@@ -148132,13 +148141,13 @@
             options: { 
                 responsive: true, 
                 maintainAspectRatio: false, 
-                layout: { padding: { bottom: 30 } }, 
-                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 12 }, padding: 15 } } } 
+                layout: { padding: { bottom: 20 } }, 
+                plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 12, boxHeight: 12, font: { size: 12, weight: 'bold' }, padding: 15 } } } 
             } 
         });
     }
 
-    // Specific Download Engine for filtered clicks
+    // Specific Download Engine for filtered clicks (Now handles A-J)
     function downloadSpecificCSV(categoryType) {
         let csv = [];
         globalData.forEach(r => {
@@ -148150,7 +148159,8 @@
             let firstChar = val.charAt(0);
             let isClassified = ['A','B','C','D','E','F','G','H','I','J'].includes(firstChar);
 
-            if (categoryType === 'classified' && isClassified) match = true;
+            if (categoryType.length === 1 && isClassified && firstChar === categoryType) match = true;
+            else if (categoryType === 'classified' && isClassified) match = true;
             else if (categoryType === 'over5' && val.includes("> 5 years")) match = true;
             else if (categoryType === 'implausible' && val.includes("Implausible")) match = true;
             else if (categoryType === 'missing' && val.includes("Missing")) match = true;
