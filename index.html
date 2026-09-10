@@ -83,33 +83,23 @@
 
         /* --- GRAPHS TAB CSS --- */
         .exclusion-toggle-bar { display: flex; flex-direction: row; justify-content: space-between; align-items: center; background: white; padding: 12px 20px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); white-space: nowrap; }
-        .toggle-options { display: flex; gap: 20px; align-items: center; font-size: 15px; color: #673ab7; font-weight: bold; margin-right: auto;}
+        .toggle-options { display: flex; gap: 20px; align-items: center; font-size: 15px; color: #673ab7; font-weight: bold; margin-right: auto; white-space: nowrap;}
         .toggle-options label { cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
         .toggle-options input[type="radio"] { transform: scale(1.2); cursor: pointer; margin: 0;}
 
-        /* PERFECT VERTICAL ALIGNMENT LAYOUT */
-        .stat-section { display: flex; flex-direction: row; align-items: stretch; height: auto; min-height: 420px; gap: 20px; background: #fdfdfd; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .stat-chart-container { width: 55%; position: relative; min-height: 400px; display: flex; flex-direction: column; justify-content: center; }
-        .stat-text-container { width: 45%; overflow-y: auto; overflow-x: hidden; background: #ffffff; border: 1px solid #bdbdbd; border-radius: 5px; padding: 15px; font-family: "Courier New", Courier, monospace; font-size: 13.5px; font-weight: 700; color: #000000; box-shadow: inset 0 0 5px rgba(0,0,0,0.05);}
-        .stats-grid-table { width: 100%; border-collapse: collapse; font-family: "Courier New", Courier, monospace; font-size: 13.5px; font-weight: 700; color: #000; line-height: 1.5; }
+        /* STRICT EQUAL HEIGHT LAYOUT */
+        .stat-section { display: flex; flex-direction: row; align-items: stretch; height: 380px; max-height: 380px; gap: 20px; background: #fdfdfd; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); box-sizing: border-box; }
+        .stat-chart-container { width: 55%; position: relative; height: 100%; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;}
+        
+        .stat-text-container { width: 45%; height: 100%; overflow-y: auto; overflow-x: hidden; background: #ffffff; border: 1px solid #bdbdbd; border-radius: 5px; padding: 15px; font-family: "Courier New", Courier, monospace; font-size: 13px; font-weight: 700; line-height: 1.4; color: #000000; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); box-sizing: border-box;}
+        .stats-grid-table { width: 100%; border-collapse: collapse; font-family: "Courier New", Courier, monospace; font-size: 12.5px; font-weight: 700; color: #000; line-height: 1.4; }
         .stats-grid-table td { padding: 3px 0; vertical-align: top; }
 
         .stat-section-title { width: 100%; font-size: 16px; font-weight: bold; color: #673ab7; border-bottom: 2px solid #ede7f6; padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase; }
 
         /* DBI FRAMEWORK CONTAINER */
-        .scatter-container { width: 100%; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .scatter-wrapper { position: relative; width: 100%; height: 750px; margin-top: 15px; background-color: #e4f0f6; border: 2px solid #666; overflow: hidden;}
-        
-        /* Exact Framework Green Labels */
-        .fw-label { position: absolute; background: #00b050; color: white; font-weight: bold; padding: 6px 12px; font-size: 14px; z-index: 10; border: 1px solid #00b050;}
-        .fw-top-center { top: 2%; left: 50%; transform: translateX(-50%); }
-        .fw-bottom-center { bottom: 2%; left: 50%; transform: translateX(-50%); }
-        .fw-left-center { left: 2%; top: 50%; transform: translateY(-50%); }
-        .fw-right-center { right: 2%; top: 50%; transform: translateY(-50%); }
-        .fw-diag-tr { top: 15%; right: 2%; }
-        .fw-diag-bl { bottom: 2%; left: 16%; }
-        .fw-curve-tl { top: 20%; left: 16%; }
-        .fw-curve-tr { top: 20%; right: 30%; }
+        .scatter-container { width: 100%; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); box-sizing: border-box;}
+        .scatter-wrapper { position: relative; width: 100%; height: 750px; margin-top: 15px; background-color: #e4f0f6; border: 2px solid #666; overflow: hidden; box-sizing: border-box;}
 
         .exclusion-footer { background: #ede7f6; border-left: 5px solid #673ab7; padding: 15px; margin-top: 20px; font-size: 13px; color: #333; line-height: 1.6; border-radius: 0 4px 4px 0;}
 
@@ -258,16 +248,7 @@
                 </div>
                 
                 <div class="scatter-wrapper">
-                    <!-- Overlay Conceptual Labels matching framework exactly -->
-                    <div class="fw-label fw-top-center">Wt. for Age +</div>
-                    <div class="fw-label fw-bottom-center">Wt. for Age -</div>
-                    <div class="fw-label fw-left-center">Ht. for Age -</div>
-                    <div class="fw-label fw-right-center">Ht. for Age +</div>
-                    <div class="fw-label fw-diag-tr">Wt. for Ht.</div>
-                    <div class="fw-label fw-diag-bl">Wt. for Ht.</div>
-                    <div class="fw-label fw-curve-tl">Wt. for Ht. +2SD</div>
-                    <div class="fw-label fw-curve-tr">Wt. for Ht. +2SD</div>
-
+                    <!-- The Canvas Plugin handles the background and labels natively for downloading -->
                     <canvas id="scatterChart"></canvas>
                 </div>
 
@@ -275,7 +256,8 @@
                     <strong>Statistical & Plotting Notes:</strong><br><br>
                     • Toggle the <strong>"Analysis Data Mode"</strong> at the top of the tab to universally include or exclude flagged outliers from all graphs and tables.<br>
                     • <strong>Exclusion Criteria (As per WHO Reference):</strong> Data points falling outside the WHO biological plausibility limits are flagged as "out of range" and are excluded when toggled. The limits are: WAZ < -6 or > 5; HAZ < -6 or > 6; WHZ < -5 or > 5.<br>
-                    • Methodologies strictly align with WHO Anthro standard cleaning criteria and ENA for SMART descriptive epidemiology guidelines.
+                    • Methodologies strictly align with WHO Anthro standard cleaning criteria and ENA for SMART descriptive epidemiology guidelines.<br>
+                    • The Conceptual Density grid mathematically maps Height-for-Age (Horizontal Axis) against Weight-for-Age (Vertical Axis).
                 </div>
             </div>
 
@@ -148185,16 +148167,16 @@
     function drawBellChart(canvasId, chartInst, dataMetrics, excludeFlags) {
         if(chartInst) chartInst.destroy();
         
-        // Safety bounds to prevent Chart.js from vanishing if data is completely empty or singular
+        // Strict safety bounding to prevent Chart.js math failure on Total outliers
         let minX = -5, maxX = 5;
         if (!excludeFlags && dataMetrics.all.length > 0) {
             let dMin = Math.min(...dataMetrics.all);
             let dMax = Math.max(...dataMetrics.all);
-            minX = Math.floor(dMin) - 1; 
-            maxX = Math.ceil(dMax) + 1;   
+            minX = Math.max(-15, Math.floor(dMin) - 1); 
+            maxX = Math.min(15, Math.ceil(dMax) + 1);   
             if (minX > -5) minX = -5;
             if (maxX < 5) maxX = 5;
-            if (minX >= maxX) maxX = minX + 1; // Strict fallback crash prevention
+            if (minX >= maxX) maxX = minX + 1; // absolute fallback
         }
 
         let whoCurve = buildGaussianCurve(0, 1, 0.1, minX, maxX);
@@ -148225,6 +148207,66 @@
     function formatLineHTML(label, count, n, metrics) {
         return `<tr><td style="padding: 2px 0;">${label}</td><td>(n=${n}):</td><td style="font-weight: normal;">(${count})</td><td>${metrics.str}</td><td style="text-align: right; font-weight: normal;">(${metrics.ci} 95% CI)</td></tr>`;
     }
+
+    // CUSTOM CANVAS PLUGIN to burn the Green Framework Labels directly into the downloaded image
+    const customFrameworkPlugin = {
+        id: 'frameworkLabelsPlugin',
+        beforeDraw: (chart) => {
+            const {ctx, chartArea: {top, left, width, height}} = chart;
+            ctx.save(); 
+            ctx.fillStyle = '#e4f0f6'; 
+            ctx.fillRect(left, top, width, height); // Icy blue background
+            ctx.restore();
+        },
+        afterDraw: (chart) => {
+            const {ctx, chartArea: {top, bottom, left, right, width, height}} = chart;
+            ctx.save();
+            
+            // Helper function to draw the green box with white text
+            function drawLabel(text, x, y, alignX, alignY) {
+                ctx.font = "bold 13px Arial";
+                const paddingX = 10, paddingY = 6;
+                const textWidth = ctx.measureText(text).width;
+                const boxWidth = textWidth + (paddingX * 2);
+                const boxHeight = 13 + (paddingY * 2);
+                
+                let boxX = x, boxY = y;
+                if(alignX === 'center') boxX = x - (boxWidth / 2);
+                else if(alignX === 'right') boxX = x - boxWidth;
+                
+                if(alignY === 'middle') boxY = y - (boxHeight / 2);
+                else if(alignY === 'bottom') boxY = y - boxHeight;
+
+                ctx.fillStyle = '#00b050';
+                ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(text, boxX + (boxWidth / 2), boxY + (boxHeight / 2));
+            }
+
+            const centerX = left + (width / 2);
+            const centerY = top + (height / 2);
+
+            // Positioning perfectly mapped to the visual framework borders
+            drawLabel('Wt. for Age +', centerX, top + 5, 'center', 'top'); // Top Center
+            drawLabel('Wt. for Age -', centerX, bottom - 5, 'center', 'bottom'); // Bottom Center
+            drawLabel('Ht. for Age -', left + 5, centerY, 'left', 'middle'); // Left Middle
+            drawLabel('Ht. for Age +', right - 5, centerY, 'right', 'middle'); // Right Middle
+            
+            drawLabel('Wt. for Ht.', right - 5, top + (height * 0.15), 'right', 'middle'); // Top Right Diagonal
+            drawLabel('Wt. for Ht.', left + (width * 0.15), bottom - 5, 'center', 'bottom'); // Bottom Left Diagonal
+            
+            drawLabel('Wt. for Ht. +2SD', left + (width * 0.15), top + (height * 0.20), 'left', 'middle'); // Top Left Curve
+            drawLabel('Wt. for Ht. +2SD', right - (width * 0.28), top + (height * 0.20), 'left', 'middle'); // Top Right Curve
+
+            ctx.restore();
+        }
+    };
 
     function generatePopulationStats() {
         let excludeFlags = document.getElementById('toggleExcl').checked;
@@ -148327,27 +148369,18 @@
             }
         });
 
-        // Exact line representation from Image 5 (Dotted curve dips and goes up)
+        // Exact line representation from framework
         let curveData = [];
-        for(let x = -5; x <= 4.5; x+=0.1) curveData.push({x: x, y: L2(x)});
+        for(let x = -4.5; x <= 3.8; x+=0.1) curveData.push({x: x, y: L2(x)}); // Truncated inside frame
 
         let frameworkLines = [
-            { type: 'line', label: 'Ht. for Age Axis', data: [{x:-8, y:0}, {x:8, y:0}], borderColor: '#808080', borderWidth: 2, pointStyle: 'line', fill: false },
-            { type: 'line', label: 'Wt. for Age Axis', data: [{x:0, y:-8}, {x:0, y:8}], borderColor: '#808080', borderWidth: 2, pointStyle: 'line', fill: false },
-            { type: 'line', label: 'Wt. for Ht. Diagonal', data: [{x:-6, y:-8}, {x:8, y:6}], borderColor: '#808080', borderWidth: 2, pointStyle: 'line', fill: false },
-            { type: 'line', label: 'Wt. for Ht. +2SD Curve', data: curveData, borderColor: '#808080', borderWidth: 2, borderDash: [5,5], pointStyle: 'line', fill: false }
+            { type: 'line', label: 'Ht. for Age Axis', data: [{x:-6, y:0}, {x:6, y:0}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
+            { type: 'line', label: 'Wt. for Age Axis', data: [{x:0, y:-6}, {x:0, y:6}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
+            { type: 'line', label: 'Wt. for Ht. Diagonal', data: [{x:-4, y:-6}, {x:7, y:5}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
+            { type: 'line', label: 'Wt. for Ht. +2SD Curve', data: curveData, borderColor: '#808080', borderWidth: 1.5, borderDash: [5,5], pointRadius: 0, fill: false }
         ];
 
         let finalDatasets = frameworkLines.concat(Object.values(scatterDatasets).filter(d => d.data.length > 0));
-
-        // Custom Plugin for Clean Icy-Blue Background matching Image 5
-        const customBgPlugin = {
-            id: 'customCanvasBackgroundColor',
-            beforeDraw: (chart, args, options) => {
-                const {ctx, chartArea: {top, left, width, height}} = chart;
-                ctx.save(); ctx.fillStyle = '#e4f0f6'; ctx.fillRect(left, top, width, height); ctx.restore();
-            }
-        };
 
         if(scatterChartInst) scatterChartInst.destroy();
         scatterChartInst = new Chart(document.getElementById('scatterChart').getContext('2d'), {
@@ -148364,7 +148397,7 @@
                         position: 'top', 
                         labels: { 
                             usePointStyle: true, boxWidth: 12, color: '#333',
-                            // Filter out structural lines from top legend as requested
+                            // Filter out structural lines from top legend
                             filter: function(item) { return !item.text.includes('Axis') && !item.text.includes('Diagonal') && !item.text.includes('Curve'); }
                         } 
                     },
@@ -148374,7 +148407,7 @@
                     }}}
                 }
             },
-            plugins: [customBgPlugin]
+            plugins: [customFrameworkPlugin] // Activates the custom green labels on canvas
         });
     }
 
