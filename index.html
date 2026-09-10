@@ -100,7 +100,7 @@
         /* DBI FRAMEWORK CONTAINER */
         .scatter-container { width: 100%; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); box-sizing: border-box;}
         .scatter-wrapper { position: relative; width: 100%; height: 750px; margin-top: 15px; background-color: #e4f0f6; border: none; overflow: hidden; box-sizing: border-box;}
-        
+
         .exclusion-footer { background: #ede7f6; border-left: 5px solid #673ab7; padding: 15px; margin-top: 20px; font-size: 13px; color: #333; line-height: 1.6; border-radius: 0 4px 4px 0;}
 
         /* Guide Grid */
@@ -113,18 +113,23 @@
         .contact-box { background-color: #f8bbd0; color: #880e4f; padding: 15px; margin-top: 20px; text-align: center; border-radius: 8px; border: 1px solid #f48fb1; font-size: 14px; line-height: 1.5; }
         .copyright-notice { font-size: 13px; color: #880e4f; background-color: #fce4ec; text-align: center; margin-top: 20px; padding: 15px; border: 1px solid #f8bbd0; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
 
-        /* PRINT STYLES */
+        /* FLAWLESS PRINT ENGINE CSS */
         @media print {
             body, html { height: auto !important; overflow: visible !important; background: white !important;}
-            .tab-wrapper, .tab-content { position: static !important; visibility: visible !important; opacity: 1 !important; height: auto !important; overflow: visible !important; border: none !important;}
-            .sticky-top { display: none !important; }
-            .stat-section { display: block !important; height: auto !important; max-height: none !important; page-break-inside: avoid; border: none; box-shadow: none; padding: 0; }
-            .stat-chart-container { width: 100% !important; height: 400px !important; margin-bottom: 20px; }
-            .stat-text-container { width: 100% !important; height: auto !important; overflow: visible !important; border: none; box-shadow: none; padding: 0; }
-            .scatter-container { page-break-inside: avoid; border: none; box-shadow: none; padding: 0; }
-            #dataEntry, #summary, #guide { display: none !important; }
+            .tab-wrapper, .tab-content { position: static !important; visibility: visible !important; opacity: 1 !important; height: auto !important; overflow: visible !important; border: none !important; margin: 0 !important; padding: 0 !important;}
+            .sticky-top, .exclusion-toggle-bar, #dataEntry, #summary, #guide, .add-row-btn, .pagination-container, .bulk-import-container { display: none !important; }
             #stats { display: block !important; }
-            .exclusion-toggle-bar { display: none !important; }
+            
+            .stat-section { display: flex !important; flex-direction: row !important; align-items: stretch !important; height: 350px !important; max-height: 350px !important; page-break-inside: avoid !important; border: 1px solid #ccc !important; box-shadow: none !important; padding: 10px !important; margin-bottom: 25px !important; }
+            .stat-chart-container { width: 55% !important; height: 100% !important; display: flex !important; flex-direction: column !important; justify-content: center !important;}
+            .stat-text-container { width: 45% !important; height: 100% !important; overflow: visible !important; border: 1px solid #bdbdbd !important; box-shadow: none !important; padding: 10px !important; }
+            
+            .stats-grid-table { font-size: 11.5px !important; line-height: 1.3 !important; }
+            
+            .scatter-container { page-break-inside: avoid !important; border: 1px solid #ccc !important; box-shadow: none !important; padding: 10px !important; margin-top: 10px !important;}
+            .scatter-wrapper { height: 600px !important; border: none !important; }
+            
+            canvas { max-width: 100% !important; max-height: 100% !important; }
         }
     </style>
 </head>
@@ -260,9 +265,9 @@
                     <div style="font-size: 18px; font-weight: bold; color: #673ab7; text-transform: uppercase;">CONCEPTUAL DENSITY PLOT - DOUBLE BURDEN INDEX</div>
                     <button class="export-btn" onclick="exportChartAsPNG('scatterChart', 'DBI_Conceptual_Density_Plot.png')" style="background-color: #673ab7;">📥 Download Chart (PNG)</button>
                 </div>
-                <p style="font-size: 13px; color: #444; font-style: italic; margin-top: 0;">This chart maps children to their A-J Classification zones based strictly on the intersecting geometric boundaries of the conceptual framework. Dots are micro-jittered to visually represent population density.</p>
                 
                 <div class="scatter-wrapper">
+                    <!-- The Canvas Plugin handles the background, labels, and text native for downloading -->
                     <canvas id="scatterChart"></canvas>
                 </div>
 
@@ -148178,9 +148183,10 @@
         return points;
     }
 
-    function drawBellChart(canvasId, chartInst, dataMetrics, excludeFlags) {
+    function drawBellChart(canvasId, chartInst, dataMetrics) {
         if(chartInst) chartInst.destroy();
         
+        // Strict Hardcoded WHO standard X-axis bounds preventing crash on extreme "Total" outliers
         let minX = -5, maxX = 5;
 
         let whoCurve = buildGaussianCurve(0, 1, 0.1, minX, maxX);
@@ -148212,15 +148218,21 @@
         return `<tr><td style="padding: 2px 0;">${label}</td><td>(n=${n}):</td><td style="font-weight: normal;">(${count})</td><td>${metrics.str}</td><td style="text-align: right; font-weight: normal;">(${metrics.ci} 95% CI)</td></tr>`;
     }
 
-    // CUSTOM CANVAS PLUGIN to burn the Black Framework Labels directly into the downloaded image
+    // CUSTOM CANVAS PLUGIN: Paints pure black text labels with line-breaking masks, preserving top legend
     const customFrameworkPlugin = {
         id: 'frameworkLabelsPlugin',
         beforeDraw: (chart) => {
-            const {ctx, chartArea: {top, left, width, height}} = chart;
-            if(!top) return;
+            const {ctx, chartArea, width, height} = chart;
             ctx.save(); 
-            ctx.fillStyle = '#e4f0f6'; 
-            ctx.fillRect(left, top, width, height);
+            // 1. Paint entire canvas white to preserve top legend on download
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            
+            // 2. Paint chart area exact icy-blue
+            if(chartArea) {
+                ctx.fillStyle = '#e4f0f6'; 
+                ctx.fillRect(chartArea.left, chartArea.top, chartArea.width, chartArea.height);
+            }
             ctx.restore();
         },
         afterDraw: (chart) => {
@@ -148228,27 +148240,48 @@
             if(!top) return;
             ctx.save();
             
+            // Function to draw text that mathematically "cuts" the line behind it
             function drawText(text, x, y, alignX, alignY) {
                 ctx.font = "15px Arial";
-                ctx.fillStyle = '#000000';
                 ctx.textAlign = alignX;
                 ctx.textBaseline = alignY;
+                
+                // Invisible icy-blue mask to perfectly break the line behind the text
+                ctx.fillStyle = '#e4f0f6';
+                const pad = 4;
+                const tWidth = ctx.measureText(text).width;
+                const tHeight = 15;
+                let bx = x;
+                if(alignX === 'center') bx -= tWidth/2;
+                else if(alignX === 'right') bx -= tWidth;
+                let by = y;
+                if(alignY === 'middle') by -= tHeight/2;
+                else if(alignY === 'bottom') by -= tHeight;
+                ctx.fillRect(bx - pad, by - pad, tWidth + pad*2, tHeight + pad*2);
+
+                // Draw pure black text
+                ctx.fillStyle = '#000000';
                 ctx.fillText(text, x, y);
             }
 
             const centerX = left + (width / 2);
             const centerY = top + (height / 2);
 
+            // Exact Coordinates to match your specific image formatting perfectly
             drawText('Wt. for Age (+)', centerX, top + 15, 'center', 'top');
             drawText('Wt. for Age (-)', centerX, bottom - 15, 'center', 'bottom');
             drawText('Ht. for Age (-)', left + 15, centerY, 'left', 'middle');
             drawText('Ht. for Age (+)', right - 15, centerY, 'right', 'middle');
             
-            drawText('Wt. for Ht.', right - 15, top + (height * 0.18), 'right', 'middle');
+            drawText('Wt. for Ht.', right - 15, top + (height * 0.15), 'right', 'middle');
             drawText('Wt. for Ht.', left + (width * 0.15), bottom - 15, 'center', 'bottom');
             
-            drawText('Wt. for Ht. (+2SD)', left + (width * 0.15), top + (height * 0.38), 'left', 'middle');
-            drawText('Wt. for Ht. (+2SD)', right - (width * 0.25), top + (height * 0.22), 'left', 'middle');
+            // Text exactly breaks the dotted line 
+            drawText('Wt. for Age', left + (width * 0.13), top + (height * 0.40), 'left', 'middle');
+            drawText('(+2SD)', left + (width * 0.13), top + (height * 0.43), 'left', 'middle');
+
+            drawText('Wt. for Age', right - (width * 0.28), top + (height * 0.22), 'left', 'middle');
+            drawText('(+2SD)', right - (width * 0.28), top + (height * 0.25), 'left', 'middle');
 
             ctx.restore();
         }
@@ -148260,7 +148293,7 @@
         // --- SECTION 1: WAZ ---
         let wazData = getStatsArr('rawWaz', excludeFlags);
         let wM = calcMetrics(wazData.all), wB = calcMetrics(wazData.boys), wG = calcMetrics(wazData.girls);
-        wazChartInst = drawBellChart('wazChart', wazChartInst, wM, excludeFlags);
+        wazChartInst = drawBellChart('wazChart', wazChartInst, wM);
 
         let uAll = wazData.all.filter(v => v < -2).length, uB = wazData.boys.filter(v => v < -2).length, uG = wazData.girls.filter(v => v < -2).length;
         let suAll = wazData.all.filter(v => v < -3).length, suB = wazData.boys.filter(v => v < -3).length, suG = wazData.girls.filter(v => v < -3).length;
@@ -148279,7 +148312,7 @@
         // --- SECTION 2: HAZ ---
         let hazData = getStatsArr('rawHaz', excludeFlags);
         let hM = calcMetrics(hazData.all), hB = calcMetrics(hazData.boys), hG = calcMetrics(hazData.girls);
-        hazChartInst = drawBellChart('hazChart', hazChartInst, hM, excludeFlags);
+        hazChartInst = drawBellChart('hazChart', hazChartInst, hM);
 
         let sAll = hazData.all.filter(v => v < -2).length, sB = hazData.boys.filter(v => v < -2).length, sG = hazData.girls.filter(v => v < -2).length;
         let ssAll = hazData.all.filter(v => v < -3).length, ssB = hazData.boys.filter(v => v < -3).length, ssG = hazData.girls.filter(v => v < -3).length;
@@ -148298,7 +148331,7 @@
         // --- SECTION 3: WHZ ---
         let whzData = getStatsArr('rawWhz', excludeFlags);
         let whM = calcMetrics(whzData.all), whB = calcMetrics(whzData.boys), whG = calcMetrics(whzData.girls);
-        whzChartInst = drawBellChart('whzChart', whzChartInst, whM, excludeFlags);
+        whzChartInst = drawBellChart('whzChart', whzChartInst, whM);
 
         let waAll = whzData.all.filter(v => v < -2).length, waB = whzData.boys.filter(v => v < -2).length, waG = whzData.girls.filter(v => v < -2).length;
         let swAll = whzData.all.filter(v => v < -3).length, swB = whzData.boys.filter(v => v < -3).length, swG = whzData.girls.filter(v => v < -3).length;
@@ -148355,13 +148388,14 @@
             }
         });
 
+        // Exact line representation mathematically shortened so text perfectly end-caps them.
         let curveData = [];
-        for(let x = -4.5; x <= 3.8; x+=0.1) curveData.push({x: x, y: L2(x)});
+        for(let x = -4.2; x <= 4.0; x+=0.1) curveData.push({x: x, y: L2(x)}); 
 
         let frameworkLines = [
-            { type: 'line', label: 'Ht. for Age Axis', data: [{x:-6, y:0}, {x:6, y:0}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
-            { type: 'line', label: 'Wt. for Age Axis', data: [{x:0, y:-6}, {x:0, y:6}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
-            { type: 'line', label: 'Wt. for Ht. Diagonal', data: [{x:-4, y:-6}, {x:7, y:5}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
+            { type: 'line', label: 'Ht. for Age Axis', data: [{x:-5.2, y:0}, {x:5.2, y:0}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
+            { type: 'line', label: 'Wt. for Age Axis', data: [{x:0, y:-5.2}, {x:0, y:5.2}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
+            { type: 'line', label: 'Wt. for Ht. Diagonal', data: [{x:-3.2, y:-5.2}, {x:5.2, y:3.2}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
             { type: 'line', label: 'Wt. for Ht. +2SD Curve', data: curveData, borderColor: '#808080', borderWidth: 1.5, borderDash: [5,5], pointRadius: 0, fill: false }
         ];
 
