@@ -99,8 +99,8 @@
 
         /* DBI FRAMEWORK CONTAINER */
         .scatter-container { width: 100%; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); box-sizing: border-box;}
-        .scatter-wrapper { position: relative; width: 100%; height: 750px; margin-top: 15px; background-color: #e4f0f6; border: 2px solid #666; overflow: hidden; box-sizing: border-box;}
-
+        .scatter-wrapper { position: relative; width: 100%; height: 750px; margin-top: 15px; background-color: #e4f0f6; border: none; overflow: hidden; box-sizing: border-box;}
+        
         .exclusion-footer { background: #ede7f6; border-left: 5px solid #673ab7; padding: 15px; margin-top: 20px; font-size: 13px; color: #333; line-height: 1.6; border-radius: 0 4px 4px 0;}
 
         /* Guide Grid */
@@ -112,6 +112,20 @@
         .tech-note h3 { margin-top: 0; color: #c2185b; border-bottom: none; font-size: 18px;}
         .contact-box { background-color: #f8bbd0; color: #880e4f; padding: 15px; margin-top: 20px; text-align: center; border-radius: 8px; border: 1px solid #f48fb1; font-size: 14px; line-height: 1.5; }
         .copyright-notice { font-size: 13px; color: #880e4f; background-color: #fce4ec; text-align: center; margin-top: 20px; padding: 15px; border: 1px solid #f8bbd0; border-radius: 8px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
+
+        /* PRINT STYLES */
+        @media print {
+            body, html { height: auto !important; overflow: visible !important; background: white !important;}
+            .tab-wrapper, .tab-content { position: static !important; visibility: visible !important; opacity: 1 !important; height: auto !important; overflow: visible !important; border: none !important;}
+            .sticky-top { display: none !important; }
+            .stat-section { display: block !important; height: auto !important; max-height: none !important; page-break-inside: avoid; border: none; box-shadow: none; padding: 0; }
+            .stat-chart-container { width: 100% !important; height: 400px !important; margin-bottom: 20px; }
+            .stat-text-container { width: 100% !important; height: auto !important; overflow: visible !important; border: none; box-shadow: none; padding: 0; }
+            .scatter-container { page-break-inside: avoid; border: none; box-shadow: none; padding: 0; }
+            #dataEntry, #summary, #guide { display: none !important; }
+            #stats { display: block !important; }
+            .exclusion-toggle-bar { display: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -246,9 +260,9 @@
                     <div style="font-size: 18px; font-weight: bold; color: #673ab7; text-transform: uppercase;">CONCEPTUAL DENSITY PLOT - DOUBLE BURDEN INDEX</div>
                     <button class="export-btn" onclick="exportChartAsPNG('scatterChart', 'DBI_Conceptual_Density_Plot.png')" style="background-color: #673ab7;">📥 Download Chart (PNG)</button>
                 </div>
+                <p style="font-size: 13px; color: #444; font-style: italic; margin-top: 0;">This chart maps children to their A-J Classification zones based strictly on the intersecting geometric boundaries of the conceptual framework. Dots are micro-jittered to visually represent population density.</p>
                 
                 <div class="scatter-wrapper">
-                    <!-- The Canvas Plugin handles the background and labels natively for downloading -->
                     <canvas id="scatterChart"></canvas>
                 </div>
 
@@ -148167,17 +148181,7 @@
     function drawBellChart(canvasId, chartInst, dataMetrics, excludeFlags) {
         if(chartInst) chartInst.destroy();
         
-        // Strict safety bounding to prevent Chart.js math failure on Total outliers
         let minX = -5, maxX = 5;
-        if (!excludeFlags && dataMetrics.all.length > 0) {
-            let dMin = Math.min(...dataMetrics.all);
-            let dMax = Math.max(...dataMetrics.all);
-            minX = Math.max(-15, Math.floor(dMin) - 1); 
-            maxX = Math.min(15, Math.ceil(dMax) + 1);   
-            if (minX > -5) minX = -5;
-            if (maxX < 5) maxX = 5;
-            if (minX >= maxX) maxX = minX + 1; // absolute fallback
-        }
 
         let whoCurve = buildGaussianCurve(0, 1, 0.1, minX, maxX);
         let sampleCurve = buildGaussianCurve(dataMetrics.mean, dataMetrics.sd, 0.1, minX, maxX);
@@ -148208,61 +148212,43 @@
         return `<tr><td style="padding: 2px 0;">${label}</td><td>(n=${n}):</td><td style="font-weight: normal;">(${count})</td><td>${metrics.str}</td><td style="text-align: right; font-weight: normal;">(${metrics.ci} 95% CI)</td></tr>`;
     }
 
-    // CUSTOM CANVAS PLUGIN to burn the Green Framework Labels directly into the downloaded image
+    // CUSTOM CANVAS PLUGIN to burn the Black Framework Labels directly into the downloaded image
     const customFrameworkPlugin = {
         id: 'frameworkLabelsPlugin',
         beforeDraw: (chart) => {
             const {ctx, chartArea: {top, left, width, height}} = chart;
+            if(!top) return;
             ctx.save(); 
             ctx.fillStyle = '#e4f0f6'; 
-            ctx.fillRect(left, top, width, height); // Icy blue background
+            ctx.fillRect(left, top, width, height);
             ctx.restore();
         },
         afterDraw: (chart) => {
             const {ctx, chartArea: {top, bottom, left, right, width, height}} = chart;
+            if(!top) return;
             ctx.save();
             
-            // Helper function to draw the green box with white text
-            function drawLabel(text, x, y, alignX, alignY) {
-                ctx.font = "bold 13px Arial";
-                const paddingX = 10, paddingY = 6;
-                const textWidth = ctx.measureText(text).width;
-                const boxWidth = textWidth + (paddingX * 2);
-                const boxHeight = 13 + (paddingY * 2);
-                
-                let boxX = x, boxY = y;
-                if(alignX === 'center') boxX = x - (boxWidth / 2);
-                else if(alignX === 'right') boxX = x - boxWidth;
-                
-                if(alignY === 'middle') boxY = y - (boxHeight / 2);
-                else if(alignY === 'bottom') boxY = y - boxHeight;
-
-                ctx.fillStyle = '#00b050';
-                ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
-                
-                ctx.fillStyle = '#ffffff';
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText(text, boxX + (boxWidth / 2), boxY + (boxHeight / 2));
+            function drawText(text, x, y, alignX, alignY) {
+                ctx.font = "15px Arial";
+                ctx.fillStyle = '#000000';
+                ctx.textAlign = alignX;
+                ctx.textBaseline = alignY;
+                ctx.fillText(text, x, y);
             }
 
             const centerX = left + (width / 2);
             const centerY = top + (height / 2);
 
-            // Positioning perfectly mapped to the visual framework borders
-            drawLabel('Wt. for Age +', centerX, top + 5, 'center', 'top'); // Top Center
-            drawLabel('Wt. for Age -', centerX, bottom - 5, 'center', 'bottom'); // Bottom Center
-            drawLabel('Ht. for Age -', left + 5, centerY, 'left', 'middle'); // Left Middle
-            drawLabel('Ht. for Age +', right - 5, centerY, 'right', 'middle'); // Right Middle
+            drawText('Wt. for Age (+)', centerX, top + 15, 'center', 'top');
+            drawText('Wt. for Age (-)', centerX, bottom - 15, 'center', 'bottom');
+            drawText('Ht. for Age (-)', left + 15, centerY, 'left', 'middle');
+            drawText('Ht. for Age (+)', right - 15, centerY, 'right', 'middle');
             
-            drawLabel('Wt. for Ht.', right - 5, top + (height * 0.15), 'right', 'middle'); // Top Right Diagonal
-            drawLabel('Wt. for Ht.', left + (width * 0.15), bottom - 5, 'center', 'bottom'); // Bottom Left Diagonal
+            drawText('Wt. for Ht.', right - 15, top + (height * 0.18), 'right', 'middle');
+            drawText('Wt. for Ht.', left + (width * 0.15), bottom - 15, 'center', 'bottom');
             
-            drawLabel('Wt. for Ht. +2SD', left + (width * 0.15), top + (height * 0.20), 'left', 'middle'); // Top Left Curve
-            drawLabel('Wt. for Ht. +2SD', right - (width * 0.28), top + (height * 0.20), 'left', 'middle'); // Top Right Curve
+            drawText('Wt. for Ht. (+2SD)', left + (width * 0.15), top + (height * 0.38), 'left', 'middle');
+            drawText('Wt. for Ht. (+2SD)', right - (width * 0.25), top + (height * 0.22), 'left', 'middle');
 
             ctx.restore();
         }
@@ -148369,9 +148355,8 @@
             }
         });
 
-        // Exact line representation from framework
         let curveData = [];
-        for(let x = -4.5; x <= 3.8; x+=0.1) curveData.push({x: x, y: L2(x)}); // Truncated inside frame
+        for(let x = -4.5; x <= 3.8; x+=0.1) curveData.push({x: x, y: L2(x)});
 
         let frameworkLines = [
             { type: 'line', label: 'Ht. for Age Axis', data: [{x:-6, y:0}, {x:6, y:0}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
@@ -148397,7 +148382,6 @@
                         position: 'top', 
                         labels: { 
                             usePointStyle: true, boxWidth: 12, color: '#333',
-                            // Filter out structural lines from top legend
                             filter: function(item) { return !item.text.includes('Axis') && !item.text.includes('Diagonal') && !item.text.includes('Curve'); }
                         } 
                     },
@@ -148407,7 +148391,7 @@
                     }}}
                 }
             },
-            plugins: [customFrameworkPlugin] // Activates the custom green labels on canvas
+            plugins: [customFrameworkPlugin]
         });
     }
 
