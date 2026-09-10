@@ -91,7 +91,8 @@
         .stat-section-title { width: 100%; font-size: 16px; font-weight: bold; color: #673ab7; border-bottom: 2px solid #ede7f6; padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase; }
         .stat-section { 
             display: flex; flex-direction: row; 
-            height: 420px; /* Locked Dashboard Height */
+            height: 480px; /* INCREASED HEIGHT so no text cuts off */
+            max-height: 480px;
             gap: 20px; background: #fdfdfd; border: 1px solid #ccc; 
             border-radius: 8px; padding: 20px; margin-bottom: 25px; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing: border-box; 
@@ -100,7 +101,7 @@
             width: 55%; height: 100%; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;
         }
         .stat-text-container { 
-            width: 45%; height: 100%; overflow: hidden; /* Removed Scrollbars for clean dashboard look */
+            width: 45%; height: 100%; overflow: hidden; /* No scrollbars needed with 480px height */
             background: #ffffff; border: 1px solid #bdbdbd; border-radius: 5px; 
             padding: 20px; box-shadow: inset 0 0 5px rgba(0,0,0,0.02); box-sizing: border-box;
             display: flex; flex-direction: column; justify-content: space-between;
@@ -139,7 +140,7 @@
             .stat-section { 
                 page-break-inside: avoid !important; 
                 display: flex !important; flex-direction: row !important; align-items: stretch !important; 
-                height: 380px !important; margin-bottom: 25px !important; border: 1px solid #ccc !important; 
+                height: 480px !important; margin-bottom: 25px !important; border: 1px solid #ccc !important; 
                 box-shadow: none !important; padding: 10px !important; 
             }
             .stat-chart-container { width: 55% !important; height: 100% !important; display: flex !important; flex-direction: column !important; justify-content: center !important;}
@@ -148205,7 +148206,7 @@
     function drawBellChart(canvasId, chartInst, dataMetrics) {
         if(chartInst) chartInst.destroy();
         
-        // Strict Hardcoded WHO standard X-axis bounds guaranteeing ZERO CRASHES
+        // Strict Hardcoded WHO standard X-axis bounds guaranteeing ZERO CRASHES on Total outliers
         let minX = -5, maxX = 5;
 
         let whoCurve = buildGaussianCurve(0, 1, 0.1, minX, maxX);
@@ -148264,7 +148265,7 @@
                 ctx.save();
                 ctx.translate(px, py);
                 ctx.rotate(rot);
-                ctx.font = "bold 14px Arial";
+                ctx.font = "14px Arial"; // Exact font styling requested (non-bold, clean)
                 ctx.textAlign = alignX;
                 ctx.textBaseline = alignY;
                 
@@ -148304,22 +148305,31 @@
             const lineAngle = Math.atan2(py2 - py1, px2 - px1);
 
             // Diagonal Line Labels perfectly angled
-            const trX = x.getPixelForValue(5.2);
-            const trY = y.getPixelForValue(3.2);
+            const trX = x.getPixelForValue(5.5);
+            const trY = y.getPixelForValue(3.5);
             drawText('Wt. for Ht.', trX + 5, trY - 5, 'left', 'bottom', lineAngle);
             
+            // Bottom Left Diagonal mathematically kept HORIZONTAL, terminating before text
             const blX = x.getPixelForValue(-3.8);
-            const blY = y.getPixelForValue(-5.8);
-            drawText('Wt. for Ht.', blX - 5, blY + 5, 'right', 'top', lineAngle);
+            drawText('Wt. for Ht.', blX - 5, bottom - 15, 'right', 'bottom', 0);
             
             // Dotted Curve Right Label mathematically rotated to match the end of the curve
             const crvX1 = x.getPixelForValue(3.8);
-            const crvY1 = y.getPixelForValue(0.5 * Math.pow(3.8 + 2, 2) - 2);
+            const crvY1 = y.getPixelForValue(0.8 * Math.pow(3.8, 2) + 2.5 * 3.8);
             const crvX2 = x.getPixelForValue(4.0);
-            const crvY2 = y.getPixelForValue(0.5 * Math.pow(4.0 + 2, 2) - 2);
+            const crvY2 = y.getPixelForValue(0.8 * Math.pow(4.0, 2) + 2.5 * 4.0);
             const curveAngle = Math.atan2(crvY2 - crvY1, crvX2 - crvX1);
             
             drawText('Wt. for Ht. (+2SD)', crvX2 + 5, crvY2, 'left', 'middle', curveAngle);
+
+            // Dotted Curve Left Label mathematical rotation matching left-side slope
+            const clX1 = x.getPixelForValue(-4.5);
+            const clY1 = y.getPixelForValue(0.8 * Math.pow(-4.5, 2) + 2.5 * -4.5);
+            const clX2 = x.getPixelForValue(-4.4);
+            const clY2 = y.getPixelForValue(0.8 * Math.pow(-4.4, 2) + 2.5 * -4.4);
+            const leftCurveAngle = Math.atan2(clY2 - clY1, clX2 - clX1);
+
+            drawText('Wt. for Age (+2SD)', clX1 - 8, clY1 - 5, 'right', 'bottom', leftCurveAngle);
 
             ctx.restore();
         }
@@ -148392,7 +148402,8 @@
         });
 
         const L1 = (x) => x - 2; 
-        const L2 = (x) => x >= 0 ? x : 0.5 * Math.pow(x+2, 2) - 2; 
+        // New steeper curve equation mathematically mimicking your green dotted line reference
+        const L2 = (x) => x >= 0 ? x : (0.8 * x * x + 2.5 * x); 
 
         function getBoundedJitter(cat) {
             for(let attempts=0; attempts<200; attempts++) {
@@ -148426,14 +148437,14 @@
             }
         });
 
-        // Exact line representation truncated inside frame
+        // Exact line representation mathematically shortened inside frame
         let curveData = [];
-        for(let x = -4.2; x <= 4.0; x+=0.1) curveData.push({x: x, y: L2(x)}); 
+        for(let x = -4.5; x <= 4.0; x+=0.1) curveData.push({x: x, y: L2(x)}); 
 
         let frameworkLines = [
-            { type: 'line', label: 'Ht. for Age Axis', data: [{x:-5.2, y:0}, {x:5.2, y:0}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
-            { type: 'line', label: 'Wt. for Age Axis', data: [{x:0, y:-5.2}, {x:0, y:5.2}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
-            { type: 'line', label: 'Wt. for Ht. Diagonal', data: [{x:-3.8, y:-5.8}, {x:5.2, y:3.2}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
+            { type: 'line', label: 'Ht. for Age Axis', data: [{x:-5.8, y:0}, {x:5.8, y:0}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
+            { type: 'line', label: 'Wt. for Age Axis', data: [{x:0, y:-5.8}, {x:0, y:5.8}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
+            { type: 'line', label: 'Wt. for Ht. Diagonal', data: [{x:-3.8, y:-5.8}, {x:5.5, y:3.5}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
             { type: 'line', label: 'Wt. for Ht. +2SD Curve', data: curveData, borderColor: '#808080', borderWidth: 1.5, borderDash: [5,5], pointRadius: 0, fill: false }
         ];
 
