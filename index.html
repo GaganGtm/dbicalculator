@@ -87,12 +87,12 @@
         .toggle-options label { cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
         .toggle-options input[type="radio"] { transform: scale(1.2); cursor: pointer; margin: 0;}
 
-        /* STRICT DASHBOARD FIXED HEIGHT LAYOUT */
+        /* STRICT DASHBOARD FIXED HEIGHT LAYOUT - INCREASED TO 550px SO SEVERE DATA DOES NOT GET CUT */
         .stat-section-title { width: 100%; font-size: 16px; font-weight: bold; color: #673ab7; border-bottom: 2px solid #ede7f6; padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase; }
         .stat-section { 
             display: flex; flex-direction: row; 
-            height: 480px; /* INCREASED HEIGHT so no text cuts off */
-            max-height: 480px;
+            height: 550px; 
+            max-height: 550px;
             gap: 20px; background: #fdfdfd; border: 1px solid #ccc; 
             border-radius: 8px; padding: 20px; margin-bottom: 25px; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing: border-box; 
@@ -101,7 +101,7 @@
             width: 55%; height: 100%; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;
         }
         .stat-text-container { 
-            width: 45%; height: 100%; overflow: hidden; /* No scrollbars needed with 480px height */
+            width: 45%; height: 100%; overflow: hidden; /* Clean dashboard look, container fits text perfectly now */
             background: #ffffff; border: 1px solid #bdbdbd; border-radius: 5px; 
             padding: 20px; box-shadow: inset 0 0 5px rgba(0,0,0,0.02); box-sizing: border-box;
             display: flex; flex-direction: column; justify-content: space-between;
@@ -140,7 +140,7 @@
             .stat-section { 
                 page-break-inside: avoid !important; 
                 display: flex !important; flex-direction: row !important; align-items: stretch !important; 
-                height: 480px !important; margin-bottom: 25px !important; border: 1px solid #ccc !important; 
+                height: 550px !important; margin-bottom: 25px !important; border: 1px solid #ccc !important; 
                 box-shadow: none !important; padding: 10px !important; 
             }
             .stat-chart-container { width: 55% !important; height: 100% !important; display: flex !important; flex-direction: column !important; justify-content: center !important;}
@@ -148235,20 +148235,20 @@
     }
 
     function formatLineHTML(label, count, n, metrics) {
-        return `<tr><td style="padding: 4px 0;">${label}</td><td>(n=${n}):</td><td style="font-weight: normal;">(${count})</td><td>${metrics.str}</td><td style="text-align: right; font-weight: normal;">(${metrics.ci} 95% CI)</td></tr>`;
+        return `<tr><td style="padding: 2px 0;">${label}</td><td>(n=${n}):</td><td style="font-weight: normal;">(${count})</td><td>${metrics.str}</td><td style="text-align: right; font-weight: normal;">(${metrics.ci} 95% CI)</td></tr>`;
     }
 
-    // CUSTOM CANVAS PLUGIN: Paints labels perfectly, cuts lines behind text, and rotates labels to match slope
+    // CUSTOM CANVAS PLUGIN: Paints pure black text labels perfectly matching the red user annotations
     const customFrameworkPlugin = {
         id: 'frameworkLabelsPlugin',
         beforeDraw: (chart) => {
             const {ctx, chartArea, width, height} = chart;
             ctx.save(); 
-            // 1. Paint entire canvas white to preserve top legend on download
+            // Paint entire canvas white to preserve top legend on download
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, width, height);
             
-            // 2. Paint chart area exact icy-blue
+            // Paint strictly the chart area exact icy-blue
             if(chartArea) {
                 ctx.fillStyle = '#e4f0f6'; 
                 ctx.fillRect(chartArea.left, chartArea.top, chartArea.width, chartArea.height);
@@ -148261,11 +148261,11 @@
             ctx.save();
             
             // Function to draw text that mathematically "cuts" the line behind it with explicit rotation
-            function drawText(text, px, py, alignX, alignY, rot = 0) {
+            function drawText(text, px, py, alignX, alignY, rot = 0, color = '#000000') {
                 ctx.save();
                 ctx.translate(px, py);
                 ctx.rotate(rot);
-                ctx.font = "14px Arial"; // Exact font styling requested (non-bold, clean)
+                ctx.font = "14px Arial"; 
                 ctx.textAlign = alignX;
                 ctx.textBaseline = alignY;
                 
@@ -148282,8 +148282,8 @@
                 else if(alignY === 'bottom') by -= tHeight;
                 ctx.fillRect(bx - pad, by - pad, tWidth + pad*2, tHeight + pad*2);
 
-                // Draw pure black text
-                ctx.fillStyle = '#000000';
+                // Draw text
+                ctx.fillStyle = color;
                 ctx.fillText(text, 0, 0);
                 ctx.restore();
             }
@@ -148305,31 +148305,29 @@
             const lineAngle = Math.atan2(py2 - py1, px2 - px1);
 
             // Diagonal Line Labels perfectly angled
-            const trX = x.getPixelForValue(5.5);
-            const trY = y.getPixelForValue(3.5);
-            drawText('Wt. for Ht.', trX + 5, trY - 5, 'left', 'bottom', lineAngle);
+            const trX = x.getPixelForValue(5.6);
+            const trY = y.getPixelForValue(3.6);
+            drawText('Wt. for Ht.', trX, trY - 5, 'right', 'bottom', lineAngle);
             
-            // Bottom Left Diagonal mathematically kept HORIZONTAL, terminating before text
+            // Bottom Left Diagonal mathematically kept HORIZONTAL, exactly leveled with Wt. for Age (-)
             const blX = x.getPixelForValue(-3.8);
             drawText('Wt. for Ht.', blX - 5, bottom - 15, 'right', 'bottom', 0);
             
-            // Dotted Curve Right Label mathematically rotated to match the end of the curve
+            // Dotted Curve Right Label mathematically rotated to match the right end of the curve tip
             const crvX1 = x.getPixelForValue(3.8);
-            const crvY1 = y.getPixelForValue(0.8 * Math.pow(3.8, 2) + 2.5 * 3.8);
+            const crvY1 = y.getPixelForValue(3.8);
             const crvX2 = x.getPixelForValue(4.0);
-            const crvY2 = y.getPixelForValue(0.8 * Math.pow(4.0, 2) + 2.5 * 4.0);
-            const curveAngle = Math.atan2(crvY2 - crvY1, crvX2 - crvX1);
+            const crvY2 = y.getPixelForValue(4.0);
+            const curveAngleRight = Math.atan2(crvY2 - crvY1, crvX2 - crvX1);
             
-            drawText('Wt. for Ht. (+2SD)', crvX2 + 5, crvY2, 'left', 'middle', curveAngle);
+            drawText('Wt. for Ht.', x.getPixelForValue(3.9), y.getPixelForValue(3.9) - 16, 'right', 'bottom', curveAngleRight);
+            drawText('(+2SD)', x.getPixelForValue(3.9), y.getPixelForValue(3.9), 'right', 'bottom', curveAngleRight);
 
-            // Dotted Curve Left Label mathematical rotation matching left-side slope
-            const clX1 = x.getPixelForValue(-4.5);
-            const clY1 = y.getPixelForValue(0.8 * Math.pow(-4.5, 2) + 2.5 * -4.5);
-            const clX2 = x.getPixelForValue(-4.4);
-            const clY2 = y.getPixelForValue(0.8 * Math.pow(-4.4, 2) + 2.5 * -4.4);
-            const leftCurveAngle = Math.atan2(clY2 - clY1, clX2 - clX1);
-
-            drawText('Wt. for Age (+2SD)', clX1 - 8, clY1 - 5, 'right', 'bottom', leftCurveAngle);
+            // Dotted Curve Left Label strictly horizontal tucked neatly into the top-left section
+            const leftCX = x.getPixelForValue(-4.2);
+            const leftCY = y.getPixelForValue(4.0);
+            drawText('Wt. for Ht.', leftCX, leftCY - 16, 'left', 'middle', 0);
+            drawText('(+2SD)', leftCX, leftCY, 'left', 'middle', 0);
 
             ctx.restore();
         }
@@ -148402,7 +148400,8 @@
         });
 
         const L1 = (x) => x - 2; 
-        // New steeper curve equation mathematically mimicking your green dotted line reference
+        
+        // Equation exactly matching your green hand-drawn curve in image_15d3ad.png
         const L2 = (x) => x >= 0 ? x : (0.8 * x * x + 2.5 * x); 
 
         function getBoundedJitter(cat) {
@@ -148444,7 +148443,7 @@
         let frameworkLines = [
             { type: 'line', label: 'Ht. for Age Axis', data: [{x:-5.8, y:0}, {x:5.8, y:0}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
             { type: 'line', label: 'Wt. for Age Axis', data: [{x:0, y:-5.8}, {x:0, y:5.8}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
-            { type: 'line', label: 'Wt. for Ht. Diagonal', data: [{x:-3.8, y:-5.8}, {x:5.5, y:3.5}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
+            { type: 'line', label: 'Wt. for Ht. Diagonal', data: [{x:-3.8, y:-5.8}, {x:5.6, y:3.6}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
             { type: 'line', label: 'Wt. for Ht. +2SD Curve', data: curveData, borderColor: '#808080', borderWidth: 1.5, borderDash: [5,5], pointRadius: 0, fill: false }
         ];
 
