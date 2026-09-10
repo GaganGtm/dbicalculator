@@ -26,7 +26,7 @@
             position: absolute; inset: 0;
             visibility: hidden; opacity: 0; pointer-events: none;
             background: #f4f7fe; padding: 15px; border: 2px solid #4285f4; border-top: none; border-radius: 0 0 8px 8px; box-sizing: border-box;
-            overflow-y: auto; transition: opacity 0.1s;
+            overflow-y: auto; overflow-x: hidden; transition: opacity 0.1s;
         }
         .tab-content.active { 
             visibility: visible; opacity: 1; pointer-events: auto; display: flex; flex-direction: column;
@@ -76,42 +76,42 @@
         .summary-table { flex-grow: 1; display: flex; flex-direction: column; background: white; padding: 15px; border-radius: 8px; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
         
         .header-with-btn { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px; }
-        .export-btn { background-color: #4caf50; color: white; border: none; padding: 5px 12px; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 12px; transition: background 0.2s; }
+        .export-btn { background-color: #4caf50; color: white; border: none; padding: 5px 12px; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 12px; transition: background 0.2s; white-space: nowrap; }
         .export-btn:hover { background-color: #388e3c; }
         .dl-link { color: #1976d2; font-weight: bold; text-decoration: underline; cursor: pointer; transition: color 0.2s; display: block; width: 100%; height: 100%;}
         .dl-link:hover { color: #d32f2f; }
 
-        /* --- POPULATION STATS & CURVES CSS --- */
+        /* --- GRAPHS TAB CSS --- */
         .exclusion-toggle-bar { display: flex; flex-direction: row; justify-content: space-between; align-items: center; background: white; padding: 12px 20px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); white-space: nowrap; }
-        .toggle-options { display: flex; gap: 30px; align-items: center; font-size: 15px; color: #673ab7; font-weight: bold;}
-        .toggle-options label { cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
-        .toggle-options input[type="radio"] { transform: scale(1.3); cursor: pointer; }
+        .toggle-options { display: flex; gap: 20px; align-items: center; font-size: 15px; color: #673ab7; font-weight: bold; margin-right: auto;}
+        .toggle-options label { cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .toggle-options input[type="radio"] { transform: scale(1.2); cursor: pointer; margin: 0;}
 
         /* PERFECT VERTICAL ALIGNMENT LAYOUT */
-        .stat-section { display: flex; flex-direction: row; align-items: stretch; height: 380px; gap: 20px; background: #fdfdfd; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .stat-chart-container { width: 55%; position: relative; height: 100%; display: flex; flex-direction: column; justify-content: center; }
-        
-        /* Grid-based text container ensures it NEVER overflows horizontally */
-        .stat-text-container { width: 45%; height: 100%; overflow-y: auto; overflow-x: hidden; background: #ffffff; border: 1px solid #bdbdbd; border-radius: 5px; padding: 15px; box-shadow: inset 0 0 5px rgba(0,0,0,0.05);}
-        .stats-grid-table { width: 100%; border-collapse: collapse; font-family: "Courier New", Courier, monospace; font-size: 13.5px; font-weight: 700; color: #000; line-height: 1.6; }
-        .stats-grid-table td { padding: 2px 0; vertical-align: top; }
+        .stat-section { display: flex; flex-direction: row; align-items: stretch; height: auto; min-height: 420px; gap: 20px; background: #fdfdfd; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .stat-chart-container { width: 55%; position: relative; min-height: 400px; display: flex; flex-direction: column; justify-content: center; }
+        .stat-text-container { width: 45%; overflow-y: auto; overflow-x: hidden; background: #ffffff; border: 1px solid #bdbdbd; border-radius: 5px; padding: 15px; font-family: "Courier New", Courier, monospace; font-size: 13.5px; font-weight: 700; color: #000000; box-shadow: inset 0 0 5px rgba(0,0,0,0.05);}
+        .stats-grid-table { width: 100%; border-collapse: collapse; font-family: "Courier New", Courier, monospace; font-size: 13.5px; font-weight: 700; color: #000; line-height: 1.5; }
+        .stats-grid-table td { padding: 3px 0; vertical-align: top; }
 
         .stat-section-title { width: 100%; font-size: 16px; font-weight: bold; color: #673ab7; border-bottom: 2px solid #ede7f6; padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase; }
 
         /* DBI FRAMEWORK CONTAINER */
         .scatter-container { width: 100%; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .scatter-wrapper { position: relative; width: 100%; height: 750px; margin-top: 15px; background-color: #ea9f13; border: 2px solid #333; overflow: hidden;}
+        .scatter-wrapper { position: relative; width: 100%; height: 750px; margin-top: 15px; background-color: #e4f0f6; border: 2px solid #666; overflow: hidden;}
         
-        /* Floating Green Labels for Framework */
-        .fw-label { position: absolute; background: #00b050; color: white; font-weight: bold; padding: 6px 12px; font-size: 14px; z-index: 10; border: 1px solid white;}
+        /* Exact Framework Green Labels */
+        .fw-label { position: absolute; background: #00b050; color: white; font-weight: bold; padding: 6px 12px; font-size: 14px; z-index: 10; border: 1px solid #00b050;}
         .fw-top-center { top: 2%; left: 50%; transform: translateX(-50%); }
         .fw-bottom-center { bottom: 2%; left: 50%; transform: translateX(-50%); }
         .fw-left-center { left: 2%; top: 50%; transform: translateY(-50%); }
         .fw-right-center { right: 2%; top: 50%; transform: translateY(-50%); }
-        .fw-diag-tr { top: 18%; right: 2%; }
-        .fw-diag-bl { bottom: 6%; left: 16%; }
-        .fw-curve-tl { top: 22%; left: 16%; }
-        .fw-curve-tr { top: 22%; right: 30%; }
+        .fw-diag-tr { top: 15%; right: 2%; }
+        .fw-diag-bl { bottom: 2%; left: 16%; }
+        .fw-curve-tl { top: 20%; left: 16%; }
+        .fw-curve-tr { top: 20%; right: 30%; }
+
+        .exclusion-footer { background: #ede7f6; border-left: 5px solid #673ab7; padding: 15px; margin-top: 20px; font-size: 13px; color: #333; line-height: 1.6; border-radius: 0 4px 4px 0;}
 
         /* Guide Grid */
         .guide-grid-2, .guide-grid-3 { display: grid; gap: 20px; margin-bottom: 20px; }
@@ -132,7 +132,7 @@
         <div class="tab-container">
             <button class="tab-btn active" id="btn-dataEntry" onclick="switchTab('dataEntry', '#4285f4', '#f4f7fe')" style="border-top: 4px solid #4285f4; color: #4285f4; background-color: #f4f7fe;">DBI Calculator</button>
             <button class="tab-btn" id="btn-summary" onclick="switchTab('summary', '#2e7d32', '#f2f9f4')">DBI Summary</button>
-            <button class="tab-btn" id="btn-stats" onclick="switchTab('stats', '#673ab7', '#ede7f6')">Population Stats & Curves</button>
+            <button class="tab-btn" id="btn-stats" onclick="switchTab('stats', '#673ab7', '#ede7f6')">Graphs</button>
             <button class="tab-btn" id="btn-guide" onclick="switchTab('guide', '#e91e63', '#fce4ec')">User Guide</button>
         </div>
     </div>
@@ -216,7 +216,7 @@
             </div>
         </div>
 
-        <!-- TAB 3: POPULATION STATISTICS & CURVES -->
+        <!-- TAB 3: GRAPHS -->
         <div id="stats" class="tab-content" style="border-color: #673ab7; background-color: #ede7f6;">
             
             <!-- Aesthetic Single Line Toggle Bar -->
@@ -256,10 +256,9 @@
                     <div style="font-size: 18px; font-weight: bold; color: #673ab7; text-transform: uppercase;">CONCEPTUAL DENSITY PLOT - DOUBLE BURDEN INDEX</div>
                     <button class="export-btn" onclick="exportChartAsPNG('scatterChart', 'DBI_Conceptual_Density_Plot.png')" style="background-color: #673ab7;">📥 Download Chart (PNG)</button>
                 </div>
-                <p style="font-size: 13px; color: #444; font-style: italic; margin-top: 0;">This chart maps children to their A-J Classification zones based strictly on the intersecting geometric boundaries of the conceptual framework. Dots are micro-jittered to visually represent population density.</p>
                 
                 <div class="scatter-wrapper">
-                    <!-- Overlay Conceptual Labels matching framework image perfectly -->
+                    <!-- Overlay Conceptual Labels matching framework exactly -->
                     <div class="fw-label fw-top-center">Wt. for Age +</div>
                     <div class="fw-label fw-bottom-center">Wt. for Age -</div>
                     <div class="fw-label fw-left-center">Ht. for Age -</div>
@@ -270,6 +269,13 @@
                     <div class="fw-label fw-curve-tr">Wt. for Ht. +2SD</div>
 
                     <canvas id="scatterChart"></canvas>
+                </div>
+
+                <div class="exclusion-footer">
+                    <strong>Statistical & Plotting Notes:</strong><br><br>
+                    • Toggle the <strong>"Analysis Data Mode"</strong> at the top of the tab to universally include or exclude flagged outliers from all graphs and tables.<br>
+                    • <strong>Exclusion Criteria (As per WHO Reference):</strong> Data points falling outside the WHO biological plausibility limits are flagged as "out of range" and are excluded when toggled. The limits are: WAZ < -6 or > 5; HAZ < -6 or > 6; WHZ < -5 or > 5.<br>
+                    • Methodologies strictly align with WHO Anthro standard cleaning criteria and ENA for SMART descriptive epidemiology guidelines.
                 </div>
             </div>
 
@@ -148179,15 +148185,16 @@
     function drawBellChart(canvasId, chartInst, dataMetrics, excludeFlags) {
         if(chartInst) chartInst.destroy();
         
-        // Dynamic X-Axis limits based on actual data if "Total" is selected
+        // Safety bounds to prevent Chart.js from vanishing if data is completely empty or singular
         let minX = -5, maxX = 5;
         if (!excludeFlags && dataMetrics.all.length > 0) {
             let dMin = Math.min(...dataMetrics.all);
             let dMax = Math.max(...dataMetrics.all);
-            minX = Math.max(-15, Math.floor(dMin) - 1); 
-            maxX = Math.min(15, Math.ceil(dMax) + 1);   
+            minX = Math.floor(dMin) - 1; 
+            maxX = Math.ceil(dMax) + 1;   
             if (minX > -5) minX = -5;
             if (maxX < 5) maxX = 5;
+            if (minX >= maxX) maxX = minX + 1; // Strict fallback crash prevention
         }
 
         let whoCurve = buildGaussianCurve(0, 1, 0.1, minX, maxX);
@@ -148320,17 +148327,27 @@
             }
         });
 
+        // Exact line representation from Image 5 (Dotted curve dips and goes up)
         let curveData = [];
-        for(let x = -3.5; x <= 4.5; x+=0.1) curveData.push({x: x, y: L2(x)});
+        for(let x = -5; x <= 4.5; x+=0.1) curveData.push({x: x, y: L2(x)});
 
         let frameworkLines = [
-            { type: 'line', label: 'Ht. for Age Axis', data: [{x:-6, y:0}, {x:6, y:0}], borderColor: '#000000', borderWidth: 2, pointStyle: 'line', fill: false },
-            { type: 'line', label: 'Wt. for Age Axis', data: [{x:0, y:-6}, {x:0, y:6}], borderColor: '#000000', borderWidth: 2, pointStyle: 'line', fill: false },
-            { type: 'line', label: 'Wt. for Ht. Diagonal', data: [{x:-4, y:-6}, {x:7, y:5}], borderColor: '#000000', borderWidth: 2, pointStyle: 'line', fill: false },
-            { type: 'line', label: 'Wt. for Ht. +2SD Curve', data: curveData, borderColor: '#000000', borderWidth: 2, borderDash: [5,5], pointStyle: 'line', fill: false }
+            { type: 'line', label: 'Ht. for Age Axis', data: [{x:-8, y:0}, {x:8, y:0}], borderColor: '#808080', borderWidth: 2, pointStyle: 'line', fill: false },
+            { type: 'line', label: 'Wt. for Age Axis', data: [{x:0, y:-8}, {x:0, y:8}], borderColor: '#808080', borderWidth: 2, pointStyle: 'line', fill: false },
+            { type: 'line', label: 'Wt. for Ht. Diagonal', data: [{x:-6, y:-8}, {x:8, y:6}], borderColor: '#808080', borderWidth: 2, pointStyle: 'line', fill: false },
+            { type: 'line', label: 'Wt. for Ht. +2SD Curve', data: curveData, borderColor: '#808080', borderWidth: 2, borderDash: [5,5], pointStyle: 'line', fill: false }
         ];
 
         let finalDatasets = frameworkLines.concat(Object.values(scatterDatasets).filter(d => d.data.length > 0));
+
+        // Custom Plugin for Clean Icy-Blue Background matching Image 5
+        const customBgPlugin = {
+            id: 'customCanvasBackgroundColor',
+            beforeDraw: (chart, args, options) => {
+                const {ctx, chartArea: {top, left, width, height}} = chart;
+                ctx.save(); ctx.fillStyle = '#e4f0f6'; ctx.fillRect(left, top, width, height); ctx.restore();
+            }
+        };
 
         if(scatterChartInst) scatterChartInst.destroy();
         scatterChartInst = new Chart(document.getElementById('scatterChart').getContext('2d'), {
@@ -148339,17 +148356,25 @@
             options: {
                 responsive: true, maintainAspectRatio: false,
                 scales: {
-                    x: { min: -6, max: 6, title: { display: true, text: 'Height for Age (HAZ)', font: {size: 14, weight: 'bold'}, padding: {top: 10} } },
-                    y: { min: -6, max: 6, title: { display: true, text: 'Weight for Age (WAZ)', font: {size: 14, weight: 'bold'}, padding: {bottom: 10} } }
+                    x: { display: false, min: -6, max: 6 },
+                    y: { display: false, min: -6, max: 6 }
                 },
                 plugins: {
-                    legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 15, color: '#333' }, display: true },
+                    legend: { 
+                        position: 'top', 
+                        labels: { 
+                            usePointStyle: true, boxWidth: 12, color: '#333',
+                            // Filter out structural lines from top legend as requested
+                            filter: function(item) { return !item.text.includes('Axis') && !item.text.includes('Diagonal') && !item.text.includes('Curve'); }
+                        } 
+                    },
                     tooltip: { callbacks: { label: (ctx) => {
                         if(ctx.dataset.type === 'line') return false; 
                         return `SN ${ctx.raw.id} (${ctx.raw.child})`; 
                     }}}
                 }
-            }
+            },
+            plugins: [customBgPlugin]
         });
     }
 
