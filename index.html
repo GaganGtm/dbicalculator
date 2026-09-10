@@ -81,21 +81,34 @@
         .dl-link { color: #1976d2; font-weight: bold; text-decoration: underline; cursor: pointer; transition: color 0.2s; display: block; width: 100%; height: 100%;}
         .dl-link:hover { color: #d32f2f; }
 
-        /* --- GRAPHS TAB CSS --- */
+        /* --- GRAPHS TAB CSS (DASHBOARD STYLE) --- */
         .exclusion-toggle-bar { display: flex; flex-direction: row; justify-content: space-between; align-items: center; background: white; padding: 12px 20px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); white-space: nowrap; }
         .toggle-options { display: flex; gap: 20px; align-items: center; font-size: 15px; color: #673ab7; font-weight: bold; margin-right: auto; white-space: nowrap;}
         .toggle-options label { cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
         .toggle-options input[type="radio"] { transform: scale(1.2); cursor: pointer; margin: 0;}
 
-        /* STRICT EQUAL HEIGHT LAYOUT */
-        .stat-section { display: flex; flex-direction: row; align-items: stretch; height: 380px; max-height: 380px; gap: 20px; background: #fdfdfd; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); box-sizing: border-box; }
-        .stat-chart-container { width: 55%; position: relative; height: 100%; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;}
-        
-        .stat-text-container { width: 45%; height: 100%; overflow-y: auto; overflow-x: hidden; background: #ffffff; border: 1px solid #bdbdbd; border-radius: 5px; padding: 15px; font-family: "Courier New", Courier, monospace; font-size: 13px; font-weight: 700; line-height: 1.4; color: #000000; box-shadow: inset 0 0 5px rgba(0,0,0,0.05); box-sizing: border-box;}
-        .stats-grid-table { width: 100%; border-collapse: collapse; font-family: "Courier New", Courier, monospace; font-size: 12.5px; font-weight: 700; color: #000; line-height: 1.4; }
-        .stats-grid-table td { padding: 3px 0; vertical-align: top; }
-
+        /* STRICT DASHBOARD FIXED HEIGHT LAYOUT */
         .stat-section-title { width: 100%; font-size: 16px; font-weight: bold; color: #673ab7; border-bottom: 2px solid #ede7f6; padding-bottom: 6px; margin-bottom: 10px; text-transform: uppercase; }
+        .stat-section { 
+            display: flex; flex-direction: row; 
+            height: 420px; /* Locked Dashboard Height */
+            gap: 20px; background: #fdfdfd; border: 1px solid #ccc; 
+            border-radius: 8px; padding: 20px; margin-bottom: 25px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing: border-box; 
+        }
+        .stat-chart-container { 
+            width: 55%; height: 100%; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;
+        }
+        .stat-text-container { 
+            width: 45%; height: 100%; overflow: hidden; /* Removed Scrollbars for clean dashboard look */
+            background: #ffffff; border: 1px solid #bdbdbd; border-radius: 5px; 
+            padding: 20px; box-shadow: inset 0 0 5px rgba(0,0,0,0.02); box-sizing: border-box;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .stats-grid-table { width: 100%; border-collapse: collapse; font-family: "Courier New", Courier, monospace; font-size: 13.5px; font-weight: 700; color: #000; line-height: 1.6; }
+        .stats-grid-table td { padding: 4px 0; vertical-align: top; border-bottom: 1px dashed #eee; }
+        .stats-grid-table tr:last-child td { border-bottom: none; }
+        .stats-footer-text { font-family: "Courier New", Courier, monospace; font-size: 13.5px; font-weight: 700; color: #000; margin-top: 15px; }
 
         /* DBI FRAMEWORK CONTAINER */
         .scatter-container { width: 100%; background: white; border: 1px solid #ccc; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); box-sizing: border-box;}
@@ -120,15 +133,21 @@
             .sticky-top, .exclusion-toggle-bar, #dataEntry, #summary, #guide, .add-row-btn, .pagination-container, .bulk-import-container { display: none !important; }
             #stats { display: block !important; }
             
-            .stat-section { display: flex !important; flex-direction: row !important; align-items: stretch !important; height: 350px !important; max-height: 350px !important; page-break-inside: avoid !important; border: 1px solid #ccc !important; box-shadow: none !important; padding: 10px !important; margin-bottom: 25px !important; }
+            .stat-section-title { page-break-after: avoid !important; margin-top: 15px !important;}
+            
+            /* Print fixes to prevent page breaks inside sections and eliminate gaps */
+            .stat-section { 
+                page-break-inside: avoid !important; 
+                display: flex !important; flex-direction: row !important; align-items: stretch !important; 
+                height: 380px !important; margin-bottom: 25px !important; border: 1px solid #ccc !important; 
+                box-shadow: none !important; padding: 10px !important; 
+            }
             .stat-chart-container { width: 55% !important; height: 100% !important; display: flex !important; flex-direction: column !important; justify-content: center !important;}
-            .stat-text-container { width: 45% !important; height: 100% !important; overflow: visible !important; border: 1px solid #bdbdbd !important; box-shadow: none !important; padding: 10px !important; }
+            .stat-text-container { width: 45% !important; height: 100% !important; border: 1px solid #bdbdbd !important; padding: 10px !important; box-shadow: none !important; overflow: hidden !important; }
             
-            .stats-grid-table { font-size: 11.5px !important; line-height: 1.3 !important; }
-            
-            .scatter-container { page-break-inside: avoid !important; border: 1px solid #ccc !important; box-shadow: none !important; padding: 10px !important; margin-top: 10px !important;}
+            /* Force the Scatter plot to cleanly break to the next full page */
+            .scatter-container { page-break-before: always !important; border: 1px solid #ccc !important; box-shadow: none !important; padding: 10px !important; margin-top: 0 !important;}
             .scatter-wrapper { height: 600px !important; border: none !important; }
-            
             canvas { max-width: 100% !important; max-height: 100% !important; }
         }
     </style>
@@ -267,7 +286,7 @@
                 </div>
                 
                 <div class="scatter-wrapper">
-                    <!-- The Canvas Plugin handles the background, labels, and text native for downloading -->
+                    <!-- The Canvas Plugin handles the background, labels, rotation, and text native for downloading -->
                     <canvas id="scatterChart"></canvas>
                 </div>
 
@@ -148186,7 +148205,7 @@
     function drawBellChart(canvasId, chartInst, dataMetrics) {
         if(chartInst) chartInst.destroy();
         
-        // Strict Hardcoded WHO standard X-axis bounds preventing crash on extreme "Total" outliers
+        // Strict Hardcoded WHO standard X-axis bounds guaranteeing ZERO CRASHES
         let minX = -5, maxX = 5;
 
         let whoCurve = buildGaussianCurve(0, 1, 0.1, minX, maxX);
@@ -148215,10 +148234,10 @@
     }
 
     function formatLineHTML(label, count, n, metrics) {
-        return `<tr><td style="padding: 2px 0;">${label}</td><td>(n=${n}):</td><td style="font-weight: normal;">(${count})</td><td>${metrics.str}</td><td style="text-align: right; font-weight: normal;">(${metrics.ci} 95% CI)</td></tr>`;
+        return `<tr><td style="padding: 4px 0;">${label}</td><td>(n=${n}):</td><td style="font-weight: normal;">(${count})</td><td>${metrics.str}</td><td style="text-align: right; font-weight: normal;">(${metrics.ci} 95% CI)</td></tr>`;
     }
 
-    // CUSTOM CANVAS PLUGIN: Paints pure black text labels with line-breaking masks, preserving top legend
+    // CUSTOM CANVAS PLUGIN: Paints labels perfectly, cuts lines behind text, and rotates labels to match slope
     const customFrameworkPlugin = {
         id: 'frameworkLabelsPlugin',
         beforeDraw: (chart) => {
@@ -148236,13 +148255,16 @@
             ctx.restore();
         },
         afterDraw: (chart) => {
-            const {ctx, chartArea: {top, bottom, left, right, width, height}} = chart;
+            const {ctx, chartArea: {top, bottom, left, right, width, height}, scales: {x, y}} = chart;
             if(!top) return;
             ctx.save();
             
-            // Function to draw text that mathematically "cuts" the line behind it
-            function drawText(text, x, y, alignX, alignY) {
-                ctx.font = "15px Arial";
+            // Function to draw text that mathematically "cuts" the line behind it with explicit rotation
+            function drawText(text, px, py, alignX, alignY, rot = 0) {
+                ctx.save();
+                ctx.translate(px, py);
+                ctx.rotate(rot);
+                ctx.font = "bold 14px Arial";
                 ctx.textAlign = alignX;
                 ctx.textBaseline = alignY;
                 
@@ -148250,38 +148272,54 @@
                 ctx.fillStyle = '#e4f0f6';
                 const pad = 4;
                 const tWidth = ctx.measureText(text).width;
-                const tHeight = 15;
-                let bx = x;
+                const tHeight = 14;
+                let bx = 0;
                 if(alignX === 'center') bx -= tWidth/2;
                 else if(alignX === 'right') bx -= tWidth;
-                let by = y;
+                let by = 0;
                 if(alignY === 'middle') by -= tHeight/2;
                 else if(alignY === 'bottom') by -= tHeight;
                 ctx.fillRect(bx - pad, by - pad, tWidth + pad*2, tHeight + pad*2);
 
                 // Draw pure black text
                 ctx.fillStyle = '#000000';
-                ctx.fillText(text, x, y);
+                ctx.fillText(text, 0, 0);
+                ctx.restore();
             }
 
-            const centerX = left + (width / 2);
-            const centerY = top + (height / 2);
+            const centerX = x.getPixelForValue(0);
+            const centerY = y.getPixelForValue(0);
 
-            // Exact Coordinates to match your specific image formatting perfectly
-            drawText('Wt. for Age (+)', centerX, top + 15, 'center', 'top');
-            drawText('Wt. for Age (-)', centerX, bottom - 15, 'center', 'bottom');
-            drawText('Ht. for Age (-)', left + 15, centerY, 'left', 'middle');
-            drawText('Ht. for Age (+)', right - 15, centerY, 'right', 'middle');
+            // Straight Axis Labels
+            drawText('Wt. for Age (+)', centerX, top + 15, 'center', 'top', 0);
+            drawText('Wt. for Age (-)', centerX, bottom - 15, 'center', 'bottom', 0);
+            drawText('Ht. for Age (-)', left + 15, centerY, 'left', 'middle', 0);
+            drawText('Ht. for Age (+)', right - 15, centerY, 'right', 'middle', 0);
             
-            drawText('Wt. for Ht.', right - 15, top + (height * 0.15), 'right', 'middle');
-            drawText('Wt. for Ht.', left + (width * 0.15), bottom - 15, 'center', 'bottom');
-            
-            // Text exactly breaks the dotted line 
-            drawText('Wt. for Age', left + (width * 0.13), top + (height * 0.40), 'left', 'middle');
-            drawText('(+2SD)', left + (width * 0.13), top + (height * 0.43), 'left', 'middle');
+            // Calculate exact visual angle of the solid diagonal line for perfect text rotation
+            const px1 = x.getPixelForValue(0);
+            const py1 = y.getPixelForValue(-2);
+            const px2 = x.getPixelForValue(2);
+            const py2 = y.getPixelForValue(0);
+            const lineAngle = Math.atan2(py2 - py1, px2 - px1);
 
-            drawText('Wt. for Age', right - (width * 0.28), top + (height * 0.22), 'left', 'middle');
-            drawText('(+2SD)', right - (width * 0.28), top + (height * 0.25), 'left', 'middle');
+            // Diagonal Line Labels perfectly angled
+            const trX = x.getPixelForValue(5.2);
+            const trY = y.getPixelForValue(3.2);
+            drawText('Wt. for Ht.', trX + 5, trY - 5, 'left', 'bottom', lineAngle);
+            
+            const blX = x.getPixelForValue(-3.8);
+            const blY = y.getPixelForValue(-5.8);
+            drawText('Wt. for Ht.', blX - 5, blY + 5, 'right', 'top', lineAngle);
+            
+            // Dotted Curve Right Label mathematically rotated to match the end of the curve
+            const crvX1 = x.getPixelForValue(3.8);
+            const crvY1 = y.getPixelForValue(0.5 * Math.pow(3.8 + 2, 2) - 2);
+            const crvX2 = x.getPixelForValue(4.0);
+            const crvY2 = y.getPixelForValue(0.5 * Math.pow(4.0 + 2, 2) - 2);
+            const curveAngle = Math.atan2(crvY2 - crvY1, crvX2 - crvX1);
+            
+            drawText('Wt. for Ht. (+2SD)', crvX2 + 5, crvY2, 'left', 'middle', curveAngle);
 
             ctx.restore();
         }
@@ -148307,7 +148345,7 @@
             `<table class="stats-grid-table">` + formatLineHTML('All', muAll, wM.n, calcPrev(muAll, wM.n)) + formatLineHTML('Boys', muB, wB.n, calcPrev(muB, wB.n)) + formatLineHTML('Girls', muG, wG.n, calcPrev(muG, wG.n)) + `</table><br>` +
             `Prevalence of severe underweight (<-3 z-score)<br>` +
             `<table class="stats-grid-table">` + formatLineHTML('All', suAll, wM.n, calcPrev(suAll, wM.n)) + formatLineHTML('Boys', suB, wB.n, calcPrev(suB, wB.n)) + formatLineHTML('Girls', suG, wG.n, calcPrev(suG, wG.n)) + `</table><br>` +
-            `mean±SD of WAZ (n=${wM.n}): ${wM.mean.toFixed(2)} ± ${wM.sd.toFixed(2)}<br>` + `z-scores not available: ${wazData.missing}<br>` + `z-scores out of range : ${wazData.flags}`;
+            `<div class="stats-footer-text">mean±SD of WAZ (n=${wM.n}): ${wM.mean.toFixed(2)} ± ${wM.sd.toFixed(2)}<br>` + `z-scores not available: ${wazData.missing}<br>` + `z-scores out of range: ${wazData.flags}</div>`;
 
         // --- SECTION 2: HAZ ---
         let hazData = getStatsArr('rawHaz', excludeFlags);
@@ -148326,7 +148364,7 @@
             `<table class="stats-grid-table">` + formatLineHTML('All', msAll, hM.n, calcPrev(msAll, hM.n)) + formatLineHTML('Boys', msB, hB.n, calcPrev(msB, hB.n)) + formatLineHTML('Girls', msG, hG.n, calcPrev(msG, hG.n)) + `</table><br>` +
             `Prevalence of severe stunting (<-3 z-score)<br>` +
             `<table class="stats-grid-table">` + formatLineHTML('All', ssAll, hM.n, calcPrev(ssAll, hM.n)) + formatLineHTML('Boys', ssB, hB.n, calcPrev(ssB, hB.n)) + formatLineHTML('Girls', ssG, hG.n, calcPrev(ssG, hG.n)) + `</table><br>` +
-            `mean±SD of HAZ (n=${hM.n}): ${hM.mean.toFixed(2)} ± ${hM.sd.toFixed(2)}<br>` + `z-scores not available: ${hazData.missing}<br>` + `z-scores out of range : ${hazData.flags}`;
+            `<div class="stats-footer-text">mean±SD of HAZ (n=${hM.n}): ${hM.mean.toFixed(2)} ± ${hM.sd.toFixed(2)}<br>` + `z-scores not available: ${hazData.missing}<br>` + `z-scores out of range: ${hazData.flags}</div>`;
 
         // --- SECTION 3: WHZ ---
         let whzData = getStatsArr('rawWhz', excludeFlags);
@@ -148345,7 +148383,7 @@
             `<table class="stats-grid-table">` + formatLineHTML('All', mwAll, whM.n, calcPrev(mwAll, whM.n)) + formatLineHTML('Boys', mwB, whB.n, calcPrev(mwB, whB.n)) + formatLineHTML('Girls', mwG, whG.n, calcPrev(mwG, whG.n)) + `</table><br>` +
             `Prevalence of severe acute malnutrition (<-3 z-score)<br>` +
             `<table class="stats-grid-table">` + formatLineHTML('All', swAll, whM.n, calcPrev(swAll, whM.n)) + formatLineHTML('Boys', swB, whB.n, calcPrev(swB, whB.n)) + formatLineHTML('Girls', swG, whG.n, calcPrev(swG, whG.n)) + `</table><br>` +
-            `mean±SD of WHZ (n=${whM.n}): ${whM.mean.toFixed(2)} ± ${whM.sd.toFixed(2)}<br>` + `z-scores not available: ${whzData.missing}<br>` + `z-scores out of range : ${whzData.flags}`;
+            `<div class="stats-footer-text">mean±SD of WHZ (n=${whM.n}): ${whM.mean.toFixed(2)} ± ${whM.sd.toFixed(2)}<br>` + `z-scores not available: ${whzData.missing}<br>` + `z-scores out of range: ${whzData.flags}</div>`;
 
         // --- SECTION 4: CONCEPTUAL DENSITY SCATTER PLOT ---
         let scatterDatasets = {};
@@ -148388,14 +148426,14 @@
             }
         });
 
-        // Exact line representation mathematically shortened so text perfectly end-caps them.
+        // Exact line representation truncated inside frame
         let curveData = [];
         for(let x = -4.2; x <= 4.0; x+=0.1) curveData.push({x: x, y: L2(x)}); 
 
         let frameworkLines = [
             { type: 'line', label: 'Ht. for Age Axis', data: [{x:-5.2, y:0}, {x:5.2, y:0}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
             { type: 'line', label: 'Wt. for Age Axis', data: [{x:0, y:-5.2}, {x:0, y:5.2}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
-            { type: 'line', label: 'Wt. for Ht. Diagonal', data: [{x:-3.2, y:-5.2}, {x:5.2, y:3.2}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
+            { type: 'line', label: 'Wt. for Ht. Diagonal', data: [{x:-3.8, y:-5.8}, {x:5.2, y:3.2}], borderColor: '#808080', borderWidth: 1.5, pointRadius: 0, fill: false },
             { type: 'line', label: 'Wt. for Ht. +2SD Curve', data: curveData, borderColor: '#808080', borderWidth: 1.5, borderDash: [5,5], pointRadius: 0, fill: false }
         ];
 
