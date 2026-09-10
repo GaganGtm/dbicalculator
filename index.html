@@ -147877,7 +147877,6 @@
   }
 ];
     
-
     // ==========================================
 
     let chartInstance = null;
@@ -148234,7 +148233,7 @@
         });
     }
 
-    // Force single line strictly for the CI text to save massive vertical space
+    // Explicitly forcing white-space: nowrap on the CI column to prevent line-breaks clipping content
     function formatLineHTML(label, count, n, metrics) {
         return `<tr><td style="padding: 2px 0;">${label}</td><td>(n=${n}):</td><td style="font-weight: normal;">(${count})</td><td>${metrics.str}</td><td style="text-align: right; font-weight: normal; white-space: nowrap;">(${metrics.ci} 95% CI)</td></tr>`;
     }
@@ -148268,18 +148267,34 @@
                 
                 ctx.fillStyle = '#e4f0f6';
                 const pad = 4;
-                const tWidth = ctx.measureText(text).width;
-                const tHeight = 14;
+                const lines = text.split('\n');
+                const tHeight = lines.length * 16;
+                const tWidth = Math.max(...lines.map(l => ctx.measureText(l).width));
+                
                 let bx = 0;
                 if(alignX === 'center') bx -= tWidth/2;
                 else if(alignX === 'right') bx -= tWidth;
+                
                 let by = 0;
                 if(alignY === 'middle') by -= tHeight/2;
                 else if(alignY === 'bottom') by -= tHeight;
+
                 ctx.fillRect(bx - pad, by - pad, tWidth + pad*2, tHeight + pad*2);
 
                 ctx.fillStyle = '#000000';
-                ctx.fillText(text, 0, 0);
+                lines.forEach((line, i) => {
+                    let lx = 0;
+                    if(alignX === 'center') lx = 0;
+                    else if(alignX === 'left') lx = 0;
+                    else if(alignX === 'right') lx = 0; // translation handles this
+                    
+                    let ly = 0;
+                    if(alignY === 'middle') ly = (i * 16) - ((lines.length - 1) * 8);
+                    else if(alignY === 'top') ly = i * 16;
+                    else if(alignY === 'bottom') ly = -(lines.length - 1 - i) * 16;
+                    
+                    ctx.fillText(line, lx, ly);
+                });
                 ctx.restore();
             }
 
@@ -148310,13 +148325,11 @@
             const crvY2 = y.getPixelForValue(0.8 * Math.pow(4.0, 2) + 2.5 * 4.0);
             const curveAngleRight = Math.atan2(crvY2 - crvY1, crvX2 - crvX1);
             
-            drawText('Wt. for Ht.', x.getPixelForValue(3.9), y.getPixelForValue(3.9) - 16, 'right', 'bottom', curveAngleRight);
-            drawText('(+2SD)', x.getPixelForValue(3.9), y.getPixelForValue(3.9), 'right', 'bottom', curveAngleRight);
+            drawText('Wt. for Ht.\n(+2SD)', x.getPixelForValue(3.9), y.getPixelForValue(3.9) - 10, 'right', 'bottom', curveAngleRight);
 
             const leftCX = x.getPixelForValue(-4.2);
             const leftCY = y.getPixelForValue(4.0);
-            drawText('Wt. for Ht.', leftCX, leftCY - 16, 'left', 'middle', 0);
-            drawText('(+2SD)', leftCX, leftCY, 'left', 'middle', 0);
+            drawText('Wt. for Ht.\n(+2SD)', leftCX, leftCY - 16, 'left', 'middle', 0);
 
             ctx.restore();
         }
@@ -148471,8 +148484,9 @@
             if(!r.fac && !r.child && !r.sDate && !r.bDate && !r.gender && r.wt==="" && r.ht==="") return;
             if (!val) return;
 
-            let match = false; let firstChar = val.charAt(0);
-            let isClassified = ['A','B','C','D','E','F','G','H','I','J'].includes(firstChar);
+            let match = false; 
+            let isClassified = val.match(/^[A-J] \(/) !== null;
+            let firstChar = isClassified ? val.charAt(0) : "";
 
             if (categoryType.length === 1 && isClassified && firstChar === categoryType) match = true;
             else if (categoryType === 'classified' && isClassified) match = true;
