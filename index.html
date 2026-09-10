@@ -139,6 +139,7 @@
             
             .stat-section-title { page-break-after: avoid !important; margin-top: 15px !important;}
             
+            /* Print fixes to prevent page breaks inside sections and eliminate gaps */
             .stat-section { 
                 page-break-inside: avoid !important; 
                 display: flex !important; flex-direction: row !important; align-items: stretch !important; 
@@ -148,6 +149,7 @@
             .stat-chart-container { width: 55% !important; height: 100% !important; display: flex !important; flex-direction: column !important; justify-content: center !important;}
             .stat-text-container { width: 45% !important; height: 100% !important; border: 1px solid #bdbdbd !important; padding: 10px !important; box-shadow: none !important; overflow: hidden !important; }
             
+            /* Force the Scatter plot to cleanly break to the next full page */
             .scatter-container { page-break-before: always !important; border: 1px solid #ccc !important; box-shadow: none !important; padding: 10px !important; margin-top: 0 !important;}
             .scatter-wrapper { height: 600px !important; border: none !important; }
             canvas { max-width: 100% !important; max-height: 100% !important; }
@@ -147877,6 +147879,7 @@
   }
 ];
     
+
     // ==========================================
 
     let chartInstance = null;
@@ -148111,8 +148114,10 @@
             if(!r.fac && !r.child && !r.sDate && !r.bDate && !r.gender && r.wt==="" && r.ht==="") return;
             if (!val) return;
             
-            let firstChar = val.charAt(0);
-            if(['A','B','C','D','E','F','G','H','I','J'].includes(firstChar)) { counts[firstChar]++; validTotal++; grandTotal++; } 
+            let isClassified = val.match(/^[A-J] \(/) !== null;
+            let firstChar = isClassified ? val.charAt(0) : "";
+
+            if (isClassified) { counts[firstChar]++; validTotal++; grandTotal++; } 
             else if(val.includes("> 5 years")) { counts.Over5++; grandTotal++; } 
             else if(val.includes("Implausible")) { counts.Implausible++; grandTotal++; } 
             else if(val.includes("Missing")) { counts.Missing++; grandTotal++; } 
@@ -148286,7 +148291,7 @@
                     let lx = 0;
                     if(alignX === 'center') lx = 0;
                     else if(alignX === 'left') lx = 0;
-                    else if(alignX === 'right') lx = 0; // translation handles this
+                    else if(alignX === 'right') lx = 0; 
                     
                     let ly = 0;
                     if(alignY === 'middle') ly = (i * 16) - ((lines.length - 1) * 8);
